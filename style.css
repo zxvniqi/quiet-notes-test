@@ -27,8 +27,11 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
   text-shadow: none !important;
 }
+/* Native GPU transforms must not make fixed controls follow document scrolling. */
+html.qn-active { transform: none !important; perspective: none !important; }
 .qn-active :is(#bg1, #bg_custom) { visibility: hidden !important; }
 .qn-active #sheld {
+  position: fixed !important;
   top: calc(var(--qn-header) + var(--qn-tools)) !important;
   height: calc(100vh - var(--qn-header) - var(--qn-tools)) !important;
   height: calc(100dvh - var(--qn-header) - var(--qn-tools)) !important;
@@ -55,6 +58,7 @@
   scroll-padding-block: 24px;
 }
 .qn-active #chat .mes {
+  flex: 0 0 auto !important;
   padding: 22px clamp(16px, 4vw, 44px) !important;
   border: 0 !important;
   border-bottom: 1px solid #edf0f3 !important;
@@ -298,6 +302,9 @@ html.qn-active.qn-actions-fold #chat .mes .mes_buttons {
   width: 100% !important; max-width: 100% !important; gap: 6px !important;
   overflow: visible !important;
 }
+/* Only an open action panel needs to escape the performance extension's paint clip. */
+html.qn-active.qn-actions-fold #chat .mes:has(.qn-actions-open) { contain: layout style !important; }
+html.qn-active.qn-actions-fold #chat .mes .mes_block:has(.qn-actions-open) { overflow: visible !important; }
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons > .extraMesButtonsHint {
   display: inline-flex !important; align-items: center; justify-content: center;
   min-width: 28px; min-height: 28px; visibility: visible !important;
@@ -372,6 +379,7 @@ html.qn-active.qn-reader #chat .mes {
 }
 html.qn-active.qn-reader #chat .mes::before,
 html.qn-active.qn-reader #chat .mes::after { display: none !important; }
+html.qn-active.qn-reader :is(#chat-lobby-fab,.mpb-answer-meta-badge) { display: none !important; }
 html.qn-active.qn-reader #chat .mes .mes_block { width: 100% !important; margin: 0 !important; padding: 0 !important; }
 html.qn-active.qn-reader #chat .mes .mes_text {
   margin: 0 !important; padding: 0 !important; border: 0 !important;
