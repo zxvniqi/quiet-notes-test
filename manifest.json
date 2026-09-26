@@ -1,0 +1,12 @@
+{
+  "display_name": "Quiet Notes Test · 테스트",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Personal theme",
+  "version": "2.6.0-beta.1",
+  "homePage": "https://github.com/zxvniqi/quiet-notes-test",
+  "auto_update": false
+}
