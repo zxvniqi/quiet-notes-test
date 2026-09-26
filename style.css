@@ -406,7 +406,7 @@ html.qn-active.qn-reader #qn-controls button[aria-expanded="true"] { background:
 html.qn-active.qn-reader #qn-controls .qn-panel { background: var(--qn-paper); border-color: #ded9cf; border-radius: 4px; }
 html.qn-active.qn-reader #top-settings-holder,
 html.qn-active.qn-reader #top-bar,
-html.qn-active.qn-reader.qn-top-visible #extensionTopBar { background: #f6f3eb !important; border-color: #ded9cf !important; }
+html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active.qn-top-visible.qn-reader #extensionTopBar { background: #f6f3eb !important; border-color: #ded9cf !important; }
 html.qn-active.qn-reader #top-settings-holder .drawer-icon { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: #7b7366 !important; }
 html.qn-active.qn-reader #form_sheld { background: var(--qn-paper) !important; }
 html.qn-active.qn-reader #send_form { background: var(--qn-paper) !important; border-color: #ded9cf !important; padding: 8px 14px !important; box-shadow: none !important; }
@@ -499,7 +499,7 @@ html.qn-active.qn-reader #top-settings-holder .drawer-icon { color: #9a9181 !imp
 html.qn-active.qn-reader #top-settings-holder .drawer-icon:is(.openIcon, :hover) { color: #4f4940 !important; }
 
 /* ── E-book: Chat Top Bar, same paper row ── */
-html.qn-active.qn-reader.qn-top-visible #extensionTopBar {
+html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active.qn-top-visible.qn-reader #extensionTopBar {
   background: #f8f5ee !important; border: 0 !important; border-bottom: 1px solid #e6e0d4 !important;
   box-shadow: none !important; color: #8a8173 !important; padding: 2px 8px !important; gap: 4px !important;
 }
