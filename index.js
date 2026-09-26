@@ -82,6 +82,14 @@
     settingsHost?.append(settingsPanel);
     composeButton.id = 'qn-input-toggle';
     composeButton.setAttribute('aria-controls', 'form_sheld');
+    // E-book header: a small ··· reveals the tools; collapsed again on outside click or Escape.
+    const moreButton = button('more', '···', '메뉴 펼치기/접기', () => setMenu(!bar.classList.contains('qn-menu-open')));
+    moreButton.className = 'qn-more';
+    function setMenu(open) {
+      bar.classList.toggle('qn-menu-open', open);
+      moreButton.setAttribute('aria-expanded', String(open));
+      if (!open) details.open = false;
+    }
     bar.append(topButton, composeButton);
     const details = document.createElement('details');
     details.id = 'qn-options';
@@ -110,7 +118,7 @@
     readerHint.textContent = '전자책 모드에서는 이미지·임베드·이름을 모두 숨깁니다. 끄면 이전 보기 설정으로 돌아갑니다.';
     panel.append(readerHint, modeButton);
     details.append(summary, panel);
-    bar.append(details);
+    bar.append(details, moreButton);
     document.body.append(bar);
     let openActions = null;
     // Change text nodes only: keep the theme's typography, decoration and DOM intact.
@@ -224,14 +232,27 @@
     document.addEventListener('pointerdown', e => {
       if (openActions && !openActions.contains(e.target)) closeActions();
     }, {signal: abort.signal});
-    document.addEventListener('pointerdown', e => { if (!details.contains(e.target)) details.open = false; }, { signal: abort.signal });
+    document.addEventListener('pointerdown', e => {
+      if (!details.contains(e.target)) details.open = false;
+      if (!bar.contains(e.target)) setMenu(false);
+    }, { signal: abort.signal });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeActions();
       if (e.key === 'Escape' && details.open) { details.open = false; summary.focus(); }
+      else if (e.key === 'Escape' && bar.classList.contains('qn-menu-open')) { setMenu(false); moreButton.focus(); }
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyM' && !e.repeat) {
         e.preventDefault(); state.enabled = !state.enabled; apply();
       }
     }, { signal: abort.signal });
+    // E-book header shows only the reading position, like a reader app's page indicator.
+    let progressFrame = 0;
+    function updateProgress() {
+      progressFrame = 0;
+      if (!state.enabled || !state.reader || !chat) return;
+      const range = chat.scrollHeight - chat.clientHeight;
+      brand.textContent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
+    }
+    chat?.addEventListener('scroll', () => { if (!progressFrame && state.reader) progressFrame = requestAnimationFrame(updateProgress); }, { passive: true, signal: abort.signal });
     let previousTitle = document.title;
     let renamedTitle = false;
     const noteIcon = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#f7f8fa"/><g fill="none" stroke="#506b87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h10l5 5v17H9zM19 5v6h5M13 16h7M13 21h7"/></g></svg>');
@@ -308,7 +329,8 @@
       }
       const media = [state.enabled, reader, state.media, state.embeds].join(':');
       if (lastMedia !== media) { refreshShells(); lastMedia = media; }
-      brand.textContent = reader ? '서재' : 'Note';
+      brand.textContent = 'Note';
+      if (reader) updateProgress(); else setMenu(false);
       topButton.textContent = reader ? '목차' : '도구';
       composeButton.textContent = reader ? '메모' : '입력';
       summary.textContent = reader ? 'Aa' : '보기';
