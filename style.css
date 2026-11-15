@@ -1,146 +1,217 @@
 @import url('./icons.css');
-/* Quiet Notes. Scoped to qn-active; disabling restores the existing theme. */
+/* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
+   No font-family is set anywhere: the theme's own fonts are kept. */
+
+/* ── Palettes ─────────────────────────────────────────────── */
+html.qn-active {
+  --qn-page: #f0f2f5; --qn-bg: #ffffff; --qn-bar: #f7f8fa; --qn-line: #dce1e7; --qn-soft: #edf0f4;
+  --qn-text: #252b34; --qn-muted: #697582; --qn-div: #b9c1cb; --qn-quote: #465c73; --qn-user: #f5f7f9;
+  --qn-info: #4a76a8; --qn-success: #3f8a5a; --qn-warning: #c2861f; --qn-error: #c04a3a;
+  color-scheme: light;
+}
+html.qn-active[data-qn-note="gray"] {
+  --qn-page: #e1e4e8; --qn-bg: #f3f4f6; --qn-bar: #eaecef; --qn-line: #d1d6dc; --qn-soft: #e1e4e8;
+  --qn-text: #22262d; --qn-muted: #646e7a; --qn-div: #aab2bc; --qn-user: #e9ecef;
+}
+html.qn-active[data-qn-note="dark"] {
+  --qn-page: #141619; --qn-bg: #1c1f23; --qn-bar: #22262b; --qn-line: #353b42; --qn-soft: #2b3036;
+  --qn-text: #d8dce1; --qn-muted: #8d97a2; --qn-div: #59616b; --qn-quote: #a2b5c9; --qn-user: #23272c;
+  --qn-info: #6f9bd0; --qn-success: #62ad7c; --qn-warning: #d9a344; --qn-error: #e07563;
+  color-scheme: dark;
+}
+html.qn-active.qn-reader {
+  --qn-page: #e9e5db; --qn-bg: #faf8f2; --qn-bar: #f5f2ea; --qn-line: #e0d9cc; --qn-soft: #ebe6db;
+  --qn-text: #3b372f; --qn-muted: #8c8373; --qn-div: #b3a690; --qn-quote: #675e50; --qn-user: transparent;
+  --qn-info: #4f7397; --qn-success: #4f7e58; --qn-warning: #b07a24; --qn-error: #b04c3c;
+  color-scheme: light;
+}
+html.qn-active.qn-reader[data-qn-paper="white"] {
+  --qn-page: #ebebeb; --qn-bg: #ffffff; --qn-bar: #fafafa; --qn-line: #e3e3e3; --qn-soft: #f0f0f0;
+  --qn-text: #262626; --qn-muted: #858585; --qn-div: #aaaaaa; --qn-quote: #555555;
+}
+html.qn-active.qn-reader[data-qn-paper="sepia"] {
+  --qn-page: #e3d8c0; --qn-bg: #f4ecd8; --qn-bar: #eee4cd; --qn-line: #dacdb0; --qn-soft: #e8dcc2;
+  --qn-text: #5a4535; --qn-muted: #8e7860; --qn-div: #b19c78; --qn-quote: #6c5540;
+}
+html.qn-active.qn-reader[data-qn-paper="gray"] {
+  --qn-page: #d3d3cf; --qn-bg: #e6e6e2; --qn-bar: #dfdfdb; --qn-line: #cdcdc8; --qn-soft: #d8d8d3;
+  --qn-text: #2e2e2b; --qn-muted: #72726c; --qn-div: #9d9d96; --qn-quote: #4f4f4a;
+}
+html.qn-active.qn-reader[data-qn-paper="night"] {
+  --qn-page: #111110; --qn-bg: #1a1917; --qn-bar: #21201e; --qn-line: #33312d; --qn-soft: #292825;
+  --qn-text: #cfc8ba; --qn-muted: #8b8579; --qn-div: #5f594f; --qn-quote: #b2a88f;
+  --qn-info: #7c9fc4; --qn-success: #78a882; --qn-warning: #cf9f4f; --qn-error: #d27a69;
+  color-scheme: dark;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
 :root.qn-active, .qn-active body {
-  --SmartThemeBodyColor: #252b34 !important;
-  --SmartThemeEmColor: #606873 !important;
-  --SmartThemeQuoteColor: #465c73 !important;
-  --SmartThemeBlurTintColor: #f7f8fa !important;
-  --SmartThemeChatTintColor: #ffffff !important;
-  --SmartThemeUserMesBlurTintColor: #f4f6f8 !important;
-  --SmartThemeBotMesBlurTintColor: #ffffff !important;
-  --SmartThemeBorderColor: #dce1e7 !important;
+  --SmartThemeBodyColor: var(--qn-text) !important;
+  --SmartThemeEmColor: var(--qn-muted) !important;
+  --SmartThemeQuoteColor: var(--qn-quote) !important;
+  --SmartThemeBlurTintColor: var(--qn-bar) !important;
+  --SmartThemeChatTintColor: var(--qn-bg) !important;
+  --SmartThemeUserMesBlurTintColor: var(--qn-user) !important;
+  --SmartThemeBotMesBlurTintColor: var(--qn-bg) !important;
+  --SmartThemeBorderColor: var(--qn-line) !important;
   --SmartThemeShadowColor: transparent !important;
   --SmartThemeBlurStrength: 0px !important;
   --shadowWidth: 0;
-  --qn-header: calc(46px + env(safe-area-inset-top, 0px));
+  --qn-header: calc(40px + env(safe-area-inset-top, 0px));
   --qn-tools: 0px;
   --topBarBlockSize: 44px;
   --topBarIconSize: 20px;
-  --mainFontSize: 16px !important;
   --sheldWidth: min(900px, 100vw);
-  color-scheme: light;
 }
 :root.qn-active.qn-top-visible, .qn-active.qn-top-visible body { --qn-tools: 44px; }
-.qn-active body {
-  background: #f0f2f5 !important;
-  color: #252b34;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
-  text-shadow: none !important;
-}
+.qn-active body { background: var(--qn-page) !important; color: var(--qn-text); text-shadow: none !important; }
 /* Native GPU transforms must not make fixed controls follow document scrolling. */
 html.qn-active { transform: none !important; perspective: none !important; }
 .qn-active :is(#bg1, #bg_custom) { visibility: hidden !important; }
-.qn-active #sheld {
+/* Triple id: theme rules (incl. nested ones) that pin #sheld to top:0 must not pull the chat under the header. */
+html.qn-active #sheld#sheld#sheld {
   position: fixed !important;
+  inset: auto 0 auto 0 !important;
   top: calc(var(--qn-header) + var(--qn-tools)) !important;
+  bottom: auto !important;
   height: calc(100vh - var(--qn-header) - var(--qn-tools)) !important;
   height: calc(100dvh - var(--qn-header) - var(--qn-tools)) !important;
   max-height: calc(100dvh - var(--qn-header) - var(--qn-tools)) !important;
+  min-height: 0 !important;
   width: min(900px, 100vw) !important;
   max-width: 100vw !important;
-  left: 0 !important;
-  right: 0 !important;
   margin: 0 auto !important;
+  transform: none !important;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
-  background: #fff;
-  border-inline: 1px solid #e3e7ec;
+  background: var(--qn-bg);
+  border-inline: 1px solid var(--qn-line);
 }
 .qn-active #chat {
   min-height: 0;
   max-height: none !important;
   flex: 1 1 auto;
-  background: #fff !important;
+  background: var(--qn-bg) !important;
   border: 0 !important;
   border-radius: 0 !important;
   scrollbar-width: thin;
-  scrollbar-color: #b9c1cb transparent;
+  scrollbar-color: var(--qn-div) transparent;
   scroll-padding-block: 24px;
 }
-.qn-active #chat .mes {
+html.qn-active #chat .mes {
   flex: 0 0 auto !important;
+  position: relative;
   padding: 22px clamp(16px, 4vw, 44px) !important;
   border: 0 !important;
-  border-bottom: 1px solid #edf0f3 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  background: #fff !important;
-  color: #252b34;
+  background: var(--qn-bg) !important;
+  color: var(--qn-text);
   gap: 12px;
 }
-.qn-active #chat .mes[is_user="true"] { background: #f5f7f9 !important; }
+.qn-active #chat .mes[is_user="true"] { background: var(--qn-user) !important; }
 .qn-active #chat .mes_block { min-width: 0; flex: 1; padding-left: 0 !important; }
-.qn-active #chat .mes_text {
-  font-size: 16px;
-  line-height: 1.85;
-  letter-spacing: -.012em;
+html.qn-active #chat .mes .mes_text {
+  font-size: var(--qn-n-size, 16px) !important;
+  line-height: var(--qn-n-line, 1.75) !important;
   overflow-wrap: anywhere;
-  word-break: normal;
-  color: #252b34;
+  word-break: keep-all;
+  color: var(--qn-text);
 }
 .qn-active #chat .mes_text p { margin-block: 0 1em; }
 .qn-active #chat .mes_text p:last-child { margin-bottom: 0; }
-.qn-active #chat .mes_text :is(em, i) { color: #606873; }
-.qn-active #chat .mes_text blockquote {
-  margin-inline: 0;
-  border-left: 3px solid #cbd3dc;
-  padding: 8px 14px;
-  background: #f7f8fa;
-  color: #465c73;
-}
+.qn-active #chat .mes_text :is(em, i) { color: var(--qn-muted); }
+.qn-active #chat .mes_text blockquote { margin-inline: 0; border-left: 3px solid var(--qn-line); padding: 8px 14px; background: var(--qn-soft); color: var(--qn-quote); }
 .qn-active #chat .mes_text pre { max-width: 100%; overflow-x: auto; white-space: pre; }
 .qn-active #chat .mes_text table { display: block; max-width: 100%; overflow-x: auto; }
-.qn-active #chat .mes_text a { color: #245f92; text-decoration: underline; }
-.qn-active #chat .ch_name { font-size: 13px; color: #606873; margin-bottom: 8px; }
+.qn-active #chat .mes_text a { color: var(--qn-info); text-decoration: underline; }
+.qn-active #chat .ch_name { font-size: 13px; color: var(--qn-muted); margin-bottom: 8px; }
 .qn-active:not(.qn-top-visible) #chat .welcomePanel { display: none !important; }
 .qn-active #chat .welcomeHeaderLogo { display: none !important; }
 .qn-active #chat .welcomeHeaderVersionDisplay { font-size: 0 !important; }
 .qn-active #chat .welcomeHeaderVersionDisplay > * { display: none !important; }
 .qn-active #chat .welcomeHeaderVersionDisplay::after { content: '최근 문서'; font-size: 18px; font-weight: 600; }
-.qn-active #chat :is(.mes_buttons, .extraMesButtons) { color: #697582; }
+.qn-active #chat :is(.mes_buttons, .extraMesButtons) { color: var(--qn-muted); }
+
+/* ── Dividers between messages (never under the newest one) ── */
+html.qn-active[data-qn-divider="line"] #chat .mes:not(.last_mes):not(:last-child) { border-bottom: 1px solid var(--qn-div) !important; }
+html.qn-active:is([data-qn-divider="short"], [data-qn-divider="stars"]) #chat .mes:not(.last_mes):not(:last-child)::after {
+  display: block !important; position: absolute !important; inset: auto auto 0 50% !important;
+  transform: translateX(-50%) !important; margin: 0 !important; border: 0 !important; opacity: 1 !important;
+  pointer-events: none; box-shadow: none !important; filter: none !important;
+}
+html.qn-active[data-qn-divider="short"] #chat .mes:not(.last_mes):not(:last-child)::after {
+  content: '' !important; width: 72px !important; height: 2px !important; background: var(--qn-div) !important; border-radius: 1px;
+}
+html.qn-active[data-qn-divider="stars"] #chat .mes:not(.last_mes):not(:last-child)::after {
+  content: '*\2003*\2003*' !important; width: auto !important; height: auto !important; padding: 0 0 4px !important;
+  background: none !important; color: var(--qn-div) !important; font-size: 15px !important; line-height: 1 !important; white-space: nowrap;
+}
+
+/* ── Composer: colours only. Icon size and position stay the theme's. ── */
 .qn-active #form_sheld { flex: 0 0 auto; margin: 0; }
-.qn-active #send_form {
-  border: 0 !important;
-  border-top: 1px solid #dce1e7 !important;
-  border-radius: 0 !important;
-  background: #f7f8fa !important;
-  padding: 8px 10px;
-  box-sizing: border-box;
+.qn-active #send_form { border: 0 !important; border-top: 1px solid var(--qn-line) !important; border-radius: 0 !important; background: var(--qn-bar) !important; box-sizing: border-box; }
+.qn-active #send_textarea { color: var(--qn-text) !important; background: transparent !important; border: 0 !important; box-shadow: none !important; font-size: 16px !important; max-height: min(220px, 32dvh) !important; }
+.qn-active #send_textarea::placeholder { color: var(--qn-muted); }
+/* Emoji-only buttons (Preset & Profile 🔌) cannot take a text colour; mute them instead. */
+html.qn-active:not(.qn-reader) #form_sheld #ppc-btn { filter: grayscale(1) opacity(.6) !important; }
+
+/* ── Native top bar and drawers ── */
+html.qn-active #top-settings-holder#top-settings-holder {
+  position: fixed !important; top: var(--qn-header) !important; left: 0 !important; right: 0 !important;
+  width: min(900px, 100vw) !important; height: 44px !important; min-height: 44px !important;
+  display: flex !important; flex-wrap: nowrap !important; justify-content: center !important;
+  margin: 0 auto !important; padding: 0 !important; transform: none !important;
+  opacity: 1 !important; visibility: visible !important;
+  background: var(--qn-bar) !important; border-bottom: 1px solid var(--qn-line) !important; box-shadow: none !important;
 }
-.qn-active #send_textarea {
-  font-family: inherit;
-  font-size: 16px !important;
-  line-height: 1.6;
-  color: #252b34 !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0;
-  box-shadow: none !important;
-  min-height: 44px;
-  max-height: min(220px, 32dvh) !important;
-  padding: 10px 12px;
-}
-.qn-active #send_textarea::placeholder { color: #747e8a; }
-.qn-active #top-settings-holder {
-  position: fixed !important;
-  top: var(--qn-header) !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: min(900px, 100vw) !important;
-  height: 44px !important;
-  background: #f7f8fa;
-  border-bottom: 1px solid #dce1e7;
-}
-.qn-active #top-bar { top: var(--qn-header) !important; background: #f7f8fa !important; box-shadow: none !important; }
-.qn-active:not(.qn-top-visible) :is(#top-settings-holder, #top-bar, #extensionTopBar, #extensionConnectionProfiles) { display: none !important; }
-.qn-active #extensionTopBar { flex-shrink: 0; background: #f7f8fa; border-bottom: 1px solid #dce1e7; }
+html.qn-active #top-settings-holder::after { display: none !important; }
+.qn-active #top-bar { top: var(--qn-header) !important; background: var(--qn-bar) !important; box-shadow: none !important; }
+html.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder#top-settings-holder, #top-bar#top-bar, #extensionTopBar#extensionTopBar, #extensionConnectionProfiles) { display: none !important; }
 .qn-active :is(.drawer-content, #left-nav-panel, #right-nav-panel) {
   top: calc(var(--qn-header) + 44px) !important;
   max-height: calc(100dvh - var(--qn-header) - 44px) !important;
-  background-color: #f7f8fa;
   text-shadow: none;
 }
-.qn-active:not(.qn-compose-visible) #form_sheld { display: none !important; }
+html.qn-active #top-settings-holder .drawer-icon { color: var(--qn-muted) !important; opacity: 1 !important; filter: none !important; }
+html.qn-active #top-settings-holder .drawer-icon:is(.openIcon, :hover) { color: var(--qn-text) !important; }
+@media (max-width: 600px) {
+  .qn-active #top-settings-holder .drawer { flex: 1 1 0; min-width: 0; }
+  .qn-active #top-settings-holder .drawer-icon { width: 100% !important; }
+}
+
+/* ── Chat Top Bar: one line, folds with the tools ── */
+html.qn-active.qn-active.qn-top-visible #extensionTopBar#extensionTopBar {
+  display: flex !important; position: relative !important; inset: auto !important;
+  width: 100% !important; min-width: 0 !important; max-width: 100% !important; height: auto !important;
+  max-height: none !important; margin: 0 !important; flex: 0 0 auto !important;
+  opacity: 1 !important; visibility: visible !important; transform: none !important;
+  background: var(--qn-bar) !important; color: var(--qn-muted) !important;
+  border: 0 !important; border-bottom: 1px solid var(--qn-line) !important; box-shadow: none !important;
+  flex-wrap: nowrap !important; overflow: visible !important; box-sizing: border-box !important;
+  white-space: nowrap !important; min-height: 36px !important; gap: 2px !important;
+  padding: 2px 6px !important; align-items: center !important;
+}
+html.qn-active #extensionTopBar > * { box-sizing: border-box !important; margin: 0 !important; text-shadow: none !important; }
+html.qn-active #extensionTopBar :is(input, select) {
+  flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important; max-width: none !important; padding-inline: 4px !important;
+  text-overflow: ellipsis; color: var(--qn-text) !important; background: transparent !important; box-shadow: none !important;
+  border: 0 !important; border-bottom: 1px solid var(--qn-line) !important; border-radius: 0 !important;
+}
+html.qn-active #extensionTopBar input::placeholder { color: var(--qn-muted) !important; }
+html.qn-active #extensionTopBar > i {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  flex: 0 0 clamp(23px, 6vw, 32px) !important; width: clamp(23px, 6vw, 32px) !important; min-width: 0 !important;
+  height: 32px !important; min-height: 32px !important; padding: 0 !important; font-size: clamp(13px, 3.7vw, 17px) !important;
+  color: var(--qn-muted) !important; background: transparent !important; border: 0 !important;
+}
+
+/* ── Visibility toggles ── */
+html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld { display: none !important; }
+html.qn-active #send_form, html.qn-active #nonQRFormItems {
+  max-height: none !important; opacity: 1 !important; visibility: visible !important; transform: none !important; min-width: 0 !important;
+}
+html.qn-active #send_form #send_textarea { display: block !important; opacity: 1 !important; visibility: visible !important; }
 .qn-active:not(.qn-avatars-visible) :is(.avatar, .avatar-container) img { visibility: hidden !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes :is(.avatar, .avatar-container, .mesAvatarWrapper) { display: none !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes { column-gap: 0 !important; row-gap: 0 !important; }
@@ -155,182 +226,111 @@ html.qn-active:not(.qn-media-visible) #chat :is(.mes_img_container, .mes_img, .m
 .qn-active:not(.qn-media-visible) #chat .mes_text *::after { background-image: none !important; }
 html.qn-active:not(.qn-embeds-visible) #chat .mes_text :is(iframe, object, embed),
 html.qn-active #chat .mes_text .qn-hidden-shell { display: none !important; }
-/* Replace just the speaker name; keep message action buttons and metadata reachable. */
+
+/* ── Header: brand on the left, ··· on the right ── */
 #qn-controls {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10000;
   display: flex;
   align-items: center;
-  gap: 4px;
-  min-height: 46px;
-  padding: env(safe-area-inset-top, 0px) max(12px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  gap: 2px;
+  min-height: 40px;
+  padding: env(safe-area-inset-top, 0px) max(4px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
   box-sizing: border-box;
-  border-bottom: 1px solid #dce1e7;
-  background: #fafbfc;
-  color: #394452;
-  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  border-bottom: 1px solid var(--qn-line);
+  background: var(--qn-bar);
+  color: var(--qn-muted);
+  font-size: 13px;
+  line-height: 1.4;
   text-shadow: none;
 }
-#qn-controls .qn-brand { flex: 1 1 auto; min-width: 46px; font-weight: 600; letter-spacing: .02em; }
+/* Just above the native top bar (3005): full-screen extensions and menus (9998+) cover it. */
+html.qn-installed #qn-controls {
+  position: fixed !important; display: flex !important; visibility: visible !important;
+  opacity: 1 !important; z-index: 3006 !important; transform: none !important;
+  overflow: visible !important; pointer-events: auto !important;
+}
+html.qn-installed:not(.qn-active) #qn-controls { display: none !important; }
+#qn-controls .qn-brand { flex: 1 1 auto; min-width: 40px; font-weight: 600; letter-spacing: .02em; color: var(--qn-text); }
 #qn-controls button, #qn-controls summary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  min-width: 48px;
-  padding: 0 12px;
-  margin: 0;
-  box-sizing: border-box;
-  color: #394452;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  font: inherit;
-  cursor: pointer;
-  list-style: none;
-  box-shadow: none;
-  text-shadow: none;
-  touch-action: manipulation;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 40px; min-width: 44px; padding: 0 10px; margin: 0; box-sizing: border-box;
+  color: var(--qn-muted); background: transparent; border: 0; border-radius: 6px;
+  font: inherit; cursor: pointer; list-style: none; box-shadow: none; text-shadow: none; touch-action: manipulation;
 }
 #qn-controls summary::-webkit-details-marker { display: none; }
-#qn-controls button:hover, #qn-controls summary:hover { background: #edf0f4; }
-#qn-controls button[aria-expanded="true"] { background: #e8edf3; }
+#qn-controls button:hover, #qn-controls summary:hover { background: var(--qn-soft); color: var(--qn-text); }
+#qn-controls button[aria-expanded="true"]:not(.qn-more) { color: var(--qn-text); box-shadow: inset 0 -2px 0 var(--qn-text); border-radius: 0; }
 #qn-controls button:disabled { opacity: .45; cursor: default; }
-#qn-controls :is(button, summary, input):focus-visible { outline: 2px solid #376d9e; outline-offset: -2px; }
+#qn-controls :is(button, summary, input):focus-visible { outline: 2px solid var(--qn-info); outline-offset: -2px; }
+#qn-controls .qn-more { min-width: 40px; padding: 0; font-size: 17px; font-weight: 700; letter-spacing: .06em; }
+#qn-controls.qn-menu-open .qn-more { color: var(--qn-text); }
+#qn-controls:not(.qn-menu-open) > :is(#qn-options, button:not(.qn-more)) { display: none !important; }
 #qn-controls .qn-panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: max(8px, env(safe-area-inset-right, 0px));
-  width: min(272px, calc(100vw - 16px));
-  padding: 10px;
-  box-sizing: border-box;
-  background: #fff;
-  border: 1px solid #dce1e7;
-  border-radius: 10px;
-  box-shadow: 0 8px 28px #27313f18;
-  max-height: calc(100dvh - var(--qn-header) - 16px);
-  overflow-y: auto;
+  position: absolute; top: calc(100% + 6px); right: max(8px, env(safe-area-inset-right, 0px));
+  width: min(272px, calc(100vw - 16px)); padding: 10px; box-sizing: border-box;
+  background: var(--qn-bg); color: var(--qn-text); border: 1px solid var(--qn-line); border-radius: 10px;
+  box-shadow: 0 8px 28px #0000001f; max-height: calc(100dvh - var(--qn-header) - 16px); overflow-y: auto;
 }
 #qn-controls [hidden] { display: none !important; }
 #qn-options:not([open]) > .qn-panel { display: none !important; }
-#qn-controls .qn-panel label:has(input:disabled) { opacity: .45; cursor: default; }
-#qn-controls .qn-reader-hint { margin: 8px 4px; font: 12px/1.6 system-ui, sans-serif; color: #777; }
 #qn-controls .qn-panel label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
-#qn-controls .qn-panel input { width: 18px; height: 18px; accent-color: #506b87; }
-@media (max-width: 600px) {
-  .qn-active #sheld { border-inline: 0; }
-  .qn-active #chat .mes { padding: 18px 16px !important; }
-  .qn-active #chat .mes_text { line-height: 1.8; }
-  .qn-active #send_form { padding-inline: 5px; }
-  #qn-controls button, #qn-controls summary { min-height: 44px; }
+#qn-controls .qn-panel label:has(input:disabled) { opacity: .45; cursor: default; }
+#qn-controls .qn-panel input { width: 18px; height: 18px; accent-color: var(--qn-muted); }
+html.qn-installed #qn-controls #qn-mode-toggle {
+  display: inline-flex !important; visibility: visible !important; opacity: 1 !important; justify-content: flex-start;
+  min-height: 44px !important; width: 100%; margin-top: 6px; border-top: 1px solid var(--qn-line); border-radius: 0; box-shadow: none;
 }
+/* Chat Lobby closes its container independently of the overlay. Match both. */
+html:has(#chat-lobby-overlay[style*="display: flex"] #chat-lobby-container:not([style*="display: none"])) #qn-controls { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   #qn-controls *, .qn-active #sheld { transition: none !important; animation: none !important; }
 }
 
-/* Explicit click states outrank the original theme's hover/slider selectors.
-   No original nodes or handlers are replaced. OFF removes these overrides. */
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active #top-settings-holder {
-  display: flex !important; flex-wrap: nowrap !important; justify-content: center !important;
-  margin: 0 auto !important; padding: 0 !important; transform: none !important;
-  top: var(--qn-header) !important; height: 44px !important; min-height: 44px !important;
-  opacity: 1 !important; visibility: visible !important;
-}
-html.qn-active.qn-active.qn-active #top-settings-holder::after { display: none !important; }
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder,#top-bar,#extensionTopBar,#extensionConnectionProfiles) { display: none !important; }
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active #send_form,
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active #nonQRFormItems {
-  max-height: none !important; opacity: 1 !important; visibility: visible !important;
-  transform: none !important; min-width: 0 !important;
-}
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active #send_textarea { display: block !important; opacity: 1 !important; visibility: visible !important; }
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active:not(.qn-compose-visible) #form_sheld { display: none !important; }
-@media(max-width:600px) {
-  #qn-controls { padding-inline: 4px; gap: 0; }
-  #qn-controls .qn-brand { display: block; padding-left: 8px; }
-  #qn-controls button, #qn-controls summary { min-width: 40px; padding-inline: 8px; }
-  .qn-active #top-settings-holder .drawer { flex: 1 1 0; min-width: 0; }
-  .qn-active #top-settings-holder .drawer-icon { width: 100% !important; }
-}
-
-/* Hide the repository owner badge in this extension row only, in both modes. */
+/* ── Settings drawer (Extensions tab) — follows the active ST theme ── */
 .extension_block[data-name="/quiet-notes"] .extension_author { display: none !important; }
-/* Keep the active mode toolbar reachable. */
-html.qn-installed #qn-controls {
-  position: fixed !important; display: flex !important; visibility: visible !important;
-  opacity: 1 !important; z-index: 2147483000 !important; transform: none !important;
-  overflow: visible !important; pointer-events: auto !important;
-}
-html.qn-installed #qn-controls #qn-mode-toggle {
-  display: inline-flex !important; visibility: visible !important; opacity: 1 !important;
-  min-height: 44px !important; width: 100%; margin-top: 6px; border-top: 1px solid #e3e7ec; border-radius: 0;
-}
-#qn-settings { margin-block: 8px; padding: 8px; border: 1px solid var(--SmartThemeBorderColor, #ccd2da); border-radius: 8px; }
-#qn-settings > summary { cursor: pointer; padding: 8px 0; font-weight: 600; }
-#qn-settings > button { display: block !important; width: 100%; min-height: 44px; margin-block: 8px; cursor: pointer; }
-/* Chat Lobby closes its container independently of the overlay. Match both. */
-html:has(#chat-lobby-overlay[style*="display: flex"] #chat-lobby-container:not([style*="display: none"])) #qn-controls {
-  display: none !important;
-}
-html.qn-active.qn-active.qn-active #send_form #send_textarea {
-  background: transparent !important; border: 0 !important; border-radius: 0 !important;
-  box-shadow: none !important;
-}
-/* OFF is available in the native wand menu, without a floating button or spacer. */
-html.qn-installed:not(.qn-active) #qn-controls { display: none !important; }
-/* Flexible text fields leave room for all seven action icons without scrolling. */
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active.qn-top-visible #extensionTopBar {
-  display: flex !important; position: relative !important; inset: auto !important;
-  width: 100% !important; min-width: 0 !important; height: auto !important;
-  max-height: none !important; margin: 0 !important; flex: 0 0 auto !important;
-  opacity: 1 !important; visibility: visible !important; transform: none !important;
-  background: #f7f8fa !important; color: #394452 !important;
-  flex-wrap: nowrap !important; overflow: visible !important;
-  box-sizing: border-box !important; max-width: 100% !important;
-  white-space: nowrap !important; min-height: 36px !important; gap: 2px !important;
-  padding: 2px 4px !important; align-items: center !important;
-}
-html.qn-active #extensionTopBar > * { box-sizing: border-box !important; margin: 0 !important; }
-html.qn-active #extensionTopBar :is(input,select) { flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important; max-width: none !important; padding-inline: 4px !important; text-overflow: ellipsis; }
-html.qn-active #extensionTopBar > i { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 0 0 clamp(23px, 6vw, 32px) !important; width: clamp(23px, 6vw, 32px) !important; min-width: 0 !important; height: 32px !important; min-height: 32px !important; padding: 0 !important; font-size: clamp(13px, 3.7vw, 18px) !important; }
-/* Use the native action group as a floating panel; do not move or clone its buttons. */
+#qn-settings .qn-settings-mode, #qn-settings .qn-settings-reset { width: 100%; margin: 6px 0; }
+#qn-settings .qn-settings-note { display: block; margin: 2px 0 8px; opacity: .7; }
+#qn-settings .qn-settings-group { margin: 8px 0; padding: 6px 10px 8px; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; }
+#qn-settings .qn-settings-group legend { padding: 0 4px; font-weight: 600; }
+#qn-settings .qn-settings-row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 36px; }
+#qn-settings .qn-settings-row :is(select, input[type="text"]) { grid-column: 2 / 4; width: 100%; margin: 0; }
+#qn-settings .qn-settings-row input[type="range"] { width: 100%; margin: 0; }
+#qn-settings .qn-settings-row output { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
+
+/* ── Message action panel: the native group, never moved or cloned ── */
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons {
   position: relative !important; display: flex !important; align-items: center !important;
-  width: 100% !important; max-width: 100% !important; gap: 6px !important;
-  overflow: visible !important;
+  width: 100% !important; max-width: 100% !important; gap: 6px !important; overflow: visible !important;
 }
 /* Only an open action panel needs to escape the performance extension's paint clip. */
 html.qn-active.qn-actions-fold #chat .mes:has(.qn-actions-open) { contain: layout style !important; }
 html.qn-active.qn-actions-fold #chat .mes .mes_block:has(.qn-actions-open) { overflow: visible !important; }
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons > .extraMesButtonsHint {
-  display: inline-flex !important; align-items: center; justify-content: center;
-  min-width: 28px; min-height: 28px; visibility: visible !important;
+  display: inline-flex !important; align-items: center; justify-content: center; min-width: 28px; min-height: 28px; visibility: visible !important;
 }
-html.qn-active.qn-actions-fold #chat .mes .mes_buttons.qn-actions-open > .extraMesButtonsHint { visibility: visible !important; }
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons > .extraMesButtons {
   position: absolute !important; inset: 100% auto auto 0 !important;
   display: flex !important; flex-wrap: wrap !important; align-items: center !important;
   box-sizing: border-box !important; width: max-content !important; max-width: 100% !important;
   min-width: 0 !important; height: auto !important; max-height: min(40vh, 240px) !important;
   gap: 8px !important; padding: 10px !important; margin: 4px 0 0 !important;
-  background: #fff !important; border: 1px solid #dce1e7; border-radius: 8px;
-  box-shadow: 0 5px 18px #27313f18; z-index: 20;
+  background: var(--qn-bg) !important; border: 1px solid var(--qn-line); border-radius: 8px;
+  box-shadow: 0 5px 18px #0000001c; z-index: 20;
   overflow: auto !important; opacity: 0 !important; visibility: hidden !important;
   pointer-events: none !important; transform: translateY(-4px);
   transition: opacity 160ms ease, transform 160ms ease, visibility 160ms !important;
 }
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons.qn-actions-open > .extraMesButtons {
-  opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;
-  transform: translateY(0);
+  opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; transform: translateY(0);
 }
 @media (prefers-reduced-motion: reduce) {
   html.qn-active.qn-actions-fold #chat .mes .mes_buttons > .extraMesButtons { transition: none !important; }
 }
 
-/* Action loader: center the actual icon, independent of the popup's size or font. */
+/* ── Action loader: document icon, centred on the actual icon ── */
 html.qn-active .popup:has(#loader:not(.splash-screen) #load-spinner) {
   position: fixed !important; inset: 0 !important; margin: 0 !important; padding: 0 !important;
   width: 100vw !important; width: 100dvw !important; height: 100vh !important; height: 100dvh !important;
@@ -352,10 +352,10 @@ html.qn-active #loader:not(.splash-screen) #load-spinner::after { display: none 
 html.qn-active #loader:not(.splash-screen) #load-spinner::before {
   content: '' !important; position: static !important; display: block !important; transform: none !important;
   width: 32px !important; height: 42px !important; margin: 0 !important; box-sizing: border-box;
-  border: 2px solid #73818e; border-radius: 4px;
-  background: linear-gradient(#a9b4be,#a9b4be) 6px 10px/16px 2px no-repeat,
-              linear-gradient(#a9b4be,#a9b4be) 6px 18px/16px 2px no-repeat,
-              linear-gradient(#a9b4be,#a9b4be) 6px 26px/11px 2px no-repeat;
+  border: 2px solid var(--qn-muted); border-radius: 4px;
+  background: linear-gradient(var(--qn-div), var(--qn-div)) 6px 10px/16px 2px no-repeat,
+              linear-gradient(var(--qn-div), var(--qn-div)) 6px 18px/16px 2px no-repeat,
+              linear-gradient(var(--qn-div), var(--qn-div)) 6px 26px/11px 2px no-repeat;
   animation: qn-action-pulse 1.4s ease-in-out infinite;
 }
 @keyframes qn-action-pulse { 50% { opacity: .4; } }
@@ -363,201 +363,92 @@ html.qn-active #loader:not(.splash-screen) #load-spinner::before {
   html.qn-active #loader:not(.splash-screen) #load-spinner::before { animation: none; }
 }
 
-/* E-book view. Effective visibility flags are forced off; saved preferences are preserved. */
-html.qn-active.qn-reader, html.qn-active.qn-reader body {
-  --SmartThemeBodyColor: #403c35 !important; --SmartThemeBlurTintColor: #f6f3eb !important;
-  --SmartThemeChatTintColor: #faf8f2 !important; --SmartThemeBorderColor: #ded9cf !important;
-  --SmartThemeQuoteColor: #675e50 !important; --qn-paper: #faf8f2;
+/* ── Notifications (both modes): a note card with a coloured edge and title ── */
+html.qn-active #toast-container {
+  position: fixed !important; top: calc(var(--qn-header) + 10px) !important; bottom: auto !important;
+  left: 50% !important; right: auto !important; width: min(380px, calc(100vw - 24px)) !important;
+  transform: translateX(-50%) !important;
 }
-html.qn-active.qn-reader body { background: #eae6dc !important; }
-html.qn-active.qn-reader #sheld { width: min(780px, 100vw) !important; background: var(--qn-paper) !important; border: 0 !important; }
-html.qn-active.qn-reader #chat { background: var(--qn-paper) !important; padding: 12px clamp(20px, 5vw, 52px) 36px !important; }
+html.qn-active[data-qn-toast="bottom"] #toast-container { top: auto !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px) !important; }
+html.qn-active #toast-container > .toast {
+  --qn-tone: var(--qn-info);
+  width: 100% !important; box-sizing: border-box !important; margin: 0 0 8px !important;
+  padding: 12px 16px 12px 18px !important; background: color-mix(in srgb, var(--qn-tone) 9%, var(--qn-bg)) !important; background-image: none !important;
+  color: var(--qn-text) !important; border: 1px solid var(--qn-line) !important; border-left: 5px solid var(--qn-tone) !important;
+  border-radius: 8px !important; box-shadow: 0 6px 22px #00000026, 0 1px 3px #00000014 !important;
+  opacity: 1 !important; font-size: 13px !important; line-height: 1.55 !important; text-shadow: none !important;
+}
+html.qn-active #toast-container > .toast-success { --qn-tone: var(--qn-success); }
+html.qn-active #toast-container > .toast-warning { --qn-tone: var(--qn-warning); }
+html.qn-active #toast-container > .toast-error { --qn-tone: var(--qn-error); }
+html.qn-active #toast-container .toast-title { color: var(--qn-tone) !important; font-weight: 700 !important; font-size: 13px !important; margin-bottom: 2px; }
+html.qn-active #toast-container .toast-message { color: var(--qn-text) !important; }
+html.qn-active #toast-container .toast-progress { background: var(--qn-tone) !important; opacity: .5 !important; height: 2px !important; }
+html.qn-active #toast-container :is(.toast-close-button, .action-loader-stop) { color: var(--qn-muted) !important; text-shadow: none !important; opacity: 1 !important; min-width: 28px; min-height: 28px; }
+
+/* ══ E-book ══════════════════════════════════════════════════
+   Effective visibility flags are forced off; saved preferences are preserved. */
+html.qn-active.qn-reader #sheld#sheld#sheld { width: min(780px, 100vw) !important; border: 0 !important; }
+html.qn-active.qn-reader #chat { padding: 8px var(--qn-r-margin, 22px) 28px !important; }
 html.qn-active.qn-reader #chat .mes {
   display: block !important; position: relative !important; width: 100% !important;
-  margin: 0 !important; padding: 28px 0 !important; min-height: 0 !important;
-  background: transparent !important; border: 0 !important; border-bottom: 1px solid #dfd9cd !important;
+  margin: 0 !important; padding: 22px 0 !important; min-height: 0 !important;
+  background: transparent !important; border: 0 !important;
 }
-html.qn-active.qn-reader #chat .mes::before,
-html.qn-active.qn-reader #chat .mes::after { display: none !important; }
-html.qn-active.qn-reader :is(#chat-lobby-fab,.mpb-answer-meta-badge) { display: none !important; }
+html.qn-active.qn-reader #chat .mes::before { display: none !important; }
+html.qn-active.qn-reader:not([data-qn-divider="short"]):not([data-qn-divider="stars"]) #chat .mes::after,
+html.qn-active.qn-reader #chat .mes:is(.last_mes, :last-child)::after { display: none !important; }
+html.qn-active.qn-reader :is(#chat-lobby-fab, .mpb-answer-meta-badge) { display: none !important; }
 html.qn-active.qn-reader #chat .mes .mes_block { width: 100% !important; margin: 0 !important; padding: 0 !important; }
 html.qn-active.qn-reader #chat .mes .mes_text {
   margin: 0 !important; padding: 0 !important; border: 0 !important;
-  font: 400 clamp(16px, 2.7vw, 18px)/1.95 Georgia, "Noto Serif KR", "Batang", serif !important;
-  color: #403c35 !important; letter-spacing: .01em !important; overflow-wrap: break-word;
+  font-size: var(--qn-r-size, 15px) !important; line-height: var(--qn-r-line, 1.7) !important;
+  font-weight: 400; color: var(--qn-text) !important; letter-spacing: 0 !important;
+  text-align: left; word-break: keep-all; overflow-wrap: anywhere;
 }
+html.qn-active.qn-reader[data-qn-align="justify"] #chat .mes .mes_text { text-align: justify; }
+html.qn-active.qn-reader #chat .mes .mes_text :is(p, li, blockquote) { font-size: inherit !important; line-height: inherit !important; }
+html.qn-active.qn-reader #chat .mes .mes_text p { margin: 0 0 var(--qn-r-para, .8em) !important; }
+html.qn-active.qn-reader #chat .mes .mes_text p:last-child { margin-bottom: 0 !important; }
 html.qn-active.qn-reader #chat .mes .mes_text p::first-letter { font-size: 1em !important; }
-html.qn-active.qn-reader #chat .mes :is(.mesAvatarWrapper,.avatar,.avatar-container,.mesIDDisplay,.mes_timer,.tokenCounterDisplay,.timestamp,.name_text,.mes_ghost,.mes_bias,.mes_file_wrapper,.mes_reasoning_details,.swipes-counter) { display: none !important; }
-html.qn-active.qn-reader #chat .mes .ch_name > :not(.mes_buttons,.mes_edit_buttons) { display: none !important; }
+html.qn-active.qn-reader #chat .mes :is(.mesAvatarWrapper, .avatar, .avatar-container, .mesIDDisplay, .mes_timer, .tokenCounterDisplay, .timestamp, .name_text, .mes_ghost, .mes_bias, .mes_file_wrapper, .mes_reasoning_details, .swipes-counter) { display: none !important; }
+html.qn-active.qn-reader #chat .mes .ch_name > :not(.mes_buttons, .mes_edit_buttons) { display: none !important; }
 html.qn-active.qn-reader #chat .mes .ch_name { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
-html.qn-active.qn-reader:not(.qn-reader-tools-visible) #chat .mes :is(.mes_buttons,.swipe_left,.swipeRightBlock,.swipe_right) { display: none !important; }
+html.qn-active.qn-reader:not(.qn-reader-tools-visible) #chat .mes :is(.mes_buttons, .swipe_left, .swipeRightBlock, .swipe_right) { display: none !important; }
 html.qn-active.qn-reader #chat .mes .mes_edit_buttons { position: relative; z-index: 1; }
 html.qn-active.qn-reader #chat .mes .mes_buttons { margin-bottom: 8px !important; }
-html.qn-active.qn-reader #chat .mes .mes_text :is(blockquote,pre) { background: #efebe2 !important; color: #675e50 !important; }
-html.qn-active.qn-reader #qn-controls {
-  background: #f6f3eb !important; border-color: #ded9cf !important; color: #655e51 !important;
-  padding-inline: max(16px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+html.qn-active.qn-reader #chat .mes .mes_text :is(blockquote, pre) { background: var(--qn-soft) !important; color: var(--qn-quote) !important; }
+
+/* Header: reading position on the left */
+html.qn-active.qn-reader #qn-controls .qn-brand { font-weight: 400; font-size: 11px; letter-spacing: .08em; color: var(--qn-muted); font-variant-numeric: tabular-nums; }
+html.qn-active.qn-reader #qn-controls summary { font-size: 15px; }
+
+/* 목차: native top bar as a reader toolbar */
+html.qn-active.qn-reader #top-settings-holder .drawer-icon { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+html.qn-active.qn-reader #top-settings-holder .drawer-icon.openIcon { box-shadow: inset 0 -2px 0 var(--qn-text) !important; }
+
+/* Chat Top Bar: chat name hidden behind redacted lines */
+html.qn-active.qn-reader #extensionTopBar#extensionTopBar #extensionTopBarChatName {
+  color: transparent !important; text-shadow: none !important; -webkit-appearance: none; appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='8'%3E%3Cg fill='%238c8373' fill-opacity='.55'%3E%3Crect width='30' height='3' y='2.5' rx='1.5'/%3E%3Crect x='36' width='18' height='3' y='2.5' rx='1.5'/%3E%3Crect x='60' width='14' height='3' y='2.5' rx='1.5'/%3E%3C/g%3E%3C/svg%3E") no-repeat 4px center / 76px 8px !important;
 }
-html.qn-active.qn-reader #qn-controls .qn-brand { font: 600 16px/1.4 Georgia, "Batang", serif; letter-spacing: .14em; }
-html.qn-active.qn-reader #qn-controls :is(button,summary) { color: #655e51; border-radius: 0; font-size: 12px; }
-html.qn-active.qn-reader #qn-controls summary { font: 19px Georgia, serif; }
-html.qn-active.qn-reader #qn-controls :is(button,summary):hover,
-html.qn-active.qn-reader #qn-controls button[aria-expanded="true"] { background: #eae5da; }
-html.qn-active.qn-reader #qn-controls .qn-panel { background: var(--qn-paper); border-color: #ded9cf; border-radius: 4px; }
-html.qn-active.qn-reader #top-settings-holder,
-html.qn-active.qn-reader #top-bar,
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active.qn-top-visible.qn-reader #extensionTopBar { background: #f6f3eb !important; border-color: #ded9cf !important; }
-html.qn-active.qn-reader #top-settings-holder .drawer-icon { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: #7b7366 !important; }
-html.qn-active.qn-reader #form_sheld { background: var(--qn-paper) !important; }
-html.qn-active.qn-reader #send_form { background: var(--qn-paper) !important; border-color: #ded9cf !important; padding: 8px 14px !important; box-shadow: none !important; }
-html.qn-active.qn-reader #send_form::before,
-html.qn-active.qn-reader #send_form::after { display: none !important; }
-html.qn-active.qn-reader #nonQRFormItems { display: flex !important; align-items: flex-end !important; gap: 8px !important; }
-html.qn-active.qn-reader #send_form #send_textarea { flex: 1 1 0 !important; min-width: 0 !important; width: 0 !important; padding: 8px 2px !important; color: #403c35 !important; font-family: Georgia,"Batang",serif !important; }
+html.qn-active.qn-reader #extensionTopBarChatName option { color: initial; }
+
+/* 메모: composer glyphs muted; stop button as a quiet pause mark */
+html.qn-active.qn-reader #send_form :is(#leftSendForm > *, #rightSendForm > *, .dm-compact--button, #llm_translate_input_button) { color: var(--qn-muted) !important; text-shadow: none !important; }
+html.qn-active.qn-reader #send_form #send_but { color: var(--qn-text) !important; }
+html.qn-active.qn-reader #send_form #mes_stop { color: var(--qn-text) !important; background: transparent !important; border-color: transparent !important; box-shadow: none !important; filter: none !important; }
+html.qn-active.qn-reader #send_form #mes_stop > i { animation: qn-action-pulse 1.6s ease-in-out infinite; }
+html.qn-active.qn-reader #form_sheld #ppc-btn { font-size: 0 !important; }
 html.qn-active.qn-reader #send_textarea::placeholder { color: transparent !important; }
-html.qn-active.qn-reader :is(#leftSendForm,#rightSendForm) { width: auto !important; gap: 8px !important; color: #7b7366 !important; }
-html.qn-active.qn-reader #send_but::before { content: '\2713' !important; font: 22px/1 system-ui, sans-serif; }
-html.qn-active.qn-reader #send_form :is(#options_button,#extensionsMenuButton)::before { color: #7b7366; font-size: 18px; }
-/* No divider under the newest message (both modes). ST marks it with .last_mes. */
-html.qn-active #chat .mes:is(.last_mes, :last-child) { border-bottom: 0 !important; }
-
-/* Composer icons: one box size and gap for native and extension buttons.
-   display is left alone so hidden buttons (stop, continue…) stay hidden. */
-html.qn-active #send_form :is(#leftSendForm, #rightSendForm) {
-  display: flex !important; align-items: center !important; gap: 0 !important;
-  flex-wrap: nowrap !important; padding: 0 !important; margin: 0 !important; width: auto !important;
+html.qn-active.qn-reader #send_form #qr--bar::before { background-color: var(--qn-line) !important; box-shadow: none !important; }
+html.qn-active.qn-reader #send_form #qr--bar, html.qn-active.qn-reader #send_form #qr--bar :is(.qr--buttons, .qr--options) { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button {
+  background: transparent !important; background-image: none !important; color: var(--qn-text) !important;
+  border: 1px solid var(--qn-line) !important; border-radius: 2px !important; box-shadow: none !important;
+  opacity: 1 !important; filter: none !important; text-shadow: none !important;
 }
-html.qn-active #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea)) {
-  box-sizing: border-box !important; flex: 0 0 30px !important;
-  width: 30px !important; min-width: 30px !important; max-width: 30px !important;
-  height: 36px !important; min-height: 36px !important; margin: 0 !important; padding: 0 !important;
-  font-size: 17px !important; line-height: 36px !important; text-align: center !important;
-  align-items: center; justify-content: center; place-items: center;
-  border: 0 !important; background: transparent !important; box-shadow: none !important;
-  border-radius: 6px !important; opacity: 1;
-}
-html.qn-active #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea))::before {
-  font-size: 17px !important; line-height: 36px !important; width: auto !important; height: auto !important;
-  margin: 0 !important; vertical-align: top;
-}
-html.qn-active #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea)) :is(i, span, div) { font-size: 17px !important; line-height: 36px !important; margin: 0 !important; }
-html.qn-active #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea)) :is(svg, img) { width: 20px !important; height: 20px !important; margin: 0 !important; vertical-align: middle; }
-html.qn-active #send_form :is(#leftSendForm, #rightSendForm) > :is(img, svg) { padding: 8px !important; }
-html.qn-active #nonQRFormItems { align-items: center !important; gap: 2px !important; }
-html.qn-active #send_form #send_textarea { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
-html.qn-active #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea)) { opacity: 1 !important; filter: none !important; }
-html.qn-active #send_textarea { resize: none !important; }
-/* Emoji-only buttons (e.g. Preset & Profile 🔌) cannot take a text color; mute them instead. */
-html.qn-active #form_sheld #send_form #leftSendForm > #ppc-btn { filter: grayscale(1) opacity(.55) !important; }
-
-/* ── E-book: compact header. Only a page indicator and a ··· menu. ── */
-#qn-controls .qn-more { display: none !important; }
-:root.qn-active.qn-reader, .qn-active.qn-reader body { --qn-header: calc(40px + env(safe-area-inset-top, 0px)); }
-html.qn-installed.qn-active.qn-reader #qn-controls {
-  min-height: 40px; gap: 2px; border-bottom: 1px solid #e6e0d4 !important;
-  background: #f8f5ee !important; font: 12px/1.4 Georgia, "Noto Serif KR", "Batang", serif;
-}
-html.qn-active.qn-reader #qn-controls .qn-brand {
-  font: 400 11px/1 Georgia, "Noto Serif KR", serif !important; letter-spacing: .08em !important;
-  color: #a59c8c; padding-left: 4px; font-variant-numeric: tabular-nums;
-}
-html.qn-active.qn-reader #qn-controls .qn-more {
-  display: inline-flex !important; min-width: 40px !important; min-height: 40px !important; padding: 0 !important;
-  font: 700 17px/1 system-ui, sans-serif !important; letter-spacing: .06em; color: #8a8173 !important;
-}
-html.qn-active.qn-reader #qn-controls:not(.qn-menu-open) > :is(#qn-options, button:not(.qn-more)) { display: none !important; }
-html.qn-active.qn-reader #qn-controls.qn-menu-open .qn-more { color: #4f4940 !important; }
-html.qn-active.qn-reader #qn-controls :is(button, summary) {
-  min-height: 40px !important; min-width: 44px !important; padding: 0 10px !important;
-  font: 13px/1 Georgia, "Noto Serif KR", "Batang", serif !important; letter-spacing: .04em;
-  background: transparent !important; color: #7d7466 !important;
-}
-html.qn-active.qn-reader #qn-controls summary { font: 16px/1 Georgia, serif !important; }
-html.qn-active.qn-reader #qn-controls button[aria-expanded="true"]:not(.qn-more) {
-  color: #3f3a32 !important; box-shadow: inset 0 -1px 0 #3f3a32 !important;
-}
-html.qn-active.qn-reader #qn-controls .qn-panel {
-  background: #fbf9f4 !important; border: 1px solid #e0d9cc !important; border-radius: 2px !important;
-  box-shadow: 0 6px 22px #3d362b14 !important; color: #5b5448; font: 14px/1.5 Georgia, "Noto Serif KR", serif;
-}
-html.qn-active.qn-reader #qn-controls .qn-panel input { accent-color: #7d7466; }
-html.qn-active.qn-reader #qn-controls .qn-panel input:checked { background-color: #8a8173 !important; border-color: #8a8173 !important; }
-/* Theme fonts set on inner tags would otherwise override the book face. */
-html.qn-active.qn-reader #chat .mes .mes_text { font-family: Georgia, "Noto Serif KR", "Noto Serif CJK KR", "AppleMyungjo", "Batang", serif !important; }
-html.qn-active.qn-reader #chat .mes .mes_text :is(p, span, strong, b, em, i:not([class*="fa-"]), q, li, div, font, u, s, small) { font-family: inherit !important; }
-html.qn-active.qn-reader #qn-controls .qn-reader-hint { color: #a59c8c; font-family: inherit; }
-html.qn-installed.qn-active.qn-reader #qn-controls #qn-mode-toggle {
-  justify-content: flex-start !important; border-top-color: #e6e0d4 !important;
-  font-size: 14px !important; color: #7d7466 !important;
-}
-
-/* ── E-book: 목차 (native top bar) ── */
-html.qn-active.qn-reader :is(#top-settings-holder, #top-bar) {
-  background: #f8f5ee !important; border-bottom: 1px solid #e6e0d4 !important; box-shadow: none !important;
-}
-html.qn-active.qn-reader #top-settings-holder .drawer-icon { color: #9a9181 !important; opacity: 1 !important; filter: none !important; }
-html.qn-active.qn-reader #top-settings-holder .drawer-icon:is(.openIcon, :hover) { color: #4f4940 !important; }
-
-/* ── E-book: Chat Top Bar, same paper row ── */
-html.qn-active.qn-active.qn-active.qn-active.qn-active.qn-active.qn-top-visible.qn-reader #extensionTopBar {
-  background: #f8f5ee !important; border: 0 !important; border-bottom: 1px solid #e6e0d4 !important;
-  box-shadow: none !important; color: #8a8173 !important; padding: 2px 8px !important; gap: 4px !important;
-}
-html.qn-active.qn-reader #extensionTopBar *:not(option) {
-  text-shadow: none !important; box-shadow: none !important; filter: none !important;
-}
-html.qn-active.qn-reader #extensionTopBar > :not(input, select) {
-  color: #9a9181 !important; background: transparent !important; border: 0 !important; border-radius: 0 !important;
-  font-size: 15px !important;
-}
-html.qn-active.qn-reader #extensionTopBar > :not(input, select):hover { color: #4f4940 !important; }
-html.qn-active.qn-reader #extensionTopBar :is(input, select) {
-  height: 28px !important; min-height: 28px !important; padding: 0 2px !important;
-  background: transparent !important; color: #5b5448 !important;
-  border: 0 !important; border-bottom: 1px solid #ddd6c9 !important; border-radius: 0 !important;
-  font: 13px/1.2 Georgia, "Noto Serif KR", "Batang", serif !important; outline: 0;
-}
-html.qn-active.qn-reader #extensionTopBar select { -webkit-appearance: none; appearance: none; }
-html.qn-active.qn-reader #extensionTopBar :is(input, select):focus { border-bottom-color: #7d7466 !important; }
-html.qn-active.qn-reader #extensionTopBar input::placeholder { color: #b8b0a2 !important; font-style: italic; }
-
-/* ── E-book: 메모 (composer + QR). QR order, grouping and handlers are untouched. ── */
-html.qn-active.qn-reader #form_sheld, html.qn-active.qn-reader #form_sheld * { text-shadow: none !important; }
-html.qn-active.qn-reader #send_form { background: #f8f5ee !important; border-top: 1px solid #e6e0d4 !important; padding: 6px 6px !important; }
-html.qn-active.qn-reader #send_form :is(#leftSendForm > *, #rightSendForm > *, #nonQRFormItems > :not(#leftSendForm, #rightSendForm, textarea)) { color: #9a9181 !important; }
-html.qn-active.qn-reader #send_form :is(#leftSendForm, #rightSendForm) > :hover { color: #4f4940 !important; }
-html.qn-active.qn-reader #send_form #send_but { color: #5b5448 !important; }
-html.qn-active.qn-reader #send_form #send_textarea { font-size: 16px !important; line-height: 1.7 !important; }
-html.qn-active.qn-reader #send_form #qr--bar,
-html.qn-active.qn-reader #send_form #qr--bar :is(.qr--buttons, .qr--options) {
-  background: transparent !important; border: 0 !important; box-shadow: none !important;
-}
-html.qn-active.qn-reader #send_form #qr--bar::before { background-color: #d9d2c5 !important; box-shadow: none !important; }
-html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea { border-bottom: 1px solid #e6e0d4 !important; }
-html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea:focus { border-bottom-color: #9a9181 !important; }
-html.qn-active.qn-reader #send_form #qr--bar { border-bottom: 1px solid #ece6db !important; margin-bottom: 4px !important; padding-bottom: 6px !important; }
-html.qn-active.qn-reader #qr--bar .qr--button,
-html.qn-active.qn-reader #qr--popout .qr--button {
-  background: transparent !important; background-image: none !important; color: #6b6356 !important;
-  border: 1px solid #ddd6c9 !important; border-radius: 2px !important; box-shadow: none !important;
-  font: 13px/1.5 Georgia, "Noto Serif KR", "Batang", serif !important; letter-spacing: .02em;
-  padding: 3px 10px !important; opacity: 1 !important; filter: none !important;
-}
-html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button:hover { background: #efeadf !important; color: #3f3a32 !important; }
-html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button :is(.qr--button-icon, i) { color: #9a9181 !important; }
-html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button-expander { color: #9a9181 !important; background: transparent !important; }
-html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--hover-item {
-  background: #fbf9f4 !important; color: #5b5448 !important; border: 1px solid #e0d9cc !important; box-shadow: 0 4px 14px #3d362b14 !important;
-}
-
-html.qn-active.qn-reader #toast-container {top: calc(var(--qn-header) + 10px) !important; bottom: auto !important; left: 50% !important; right: auto !important; width: min(380px,calc(100vw - 32px)) !important; transform: translateX(-50%); }
-html.qn-active.qn-reader #toast-container > .toast {
-  width: 100% !important; box-sizing: border-box !important; padding: 14px 18px !important; margin: 0 0 8px !important;
-  background: #f6f3eb !important; background-image: none !important; color: #514a3f !important;
-  border: 1px solid #d9d2c5 !important; border-radius: 6px !important; box-shadow: 0 3px 16px #423b3012 !important;
-  opacity: 1; font: 13px/1.6 system-ui,sans-serif !important; text-shadow: none !important;
-}
-html.qn-active.qn-reader #toast-container > .toast-error { border-left: 3px solid #a56656 !important; }
-html.qn-active.qn-reader #toast-container > .toast-warning { border-left: 3px solid #ad9058 !important; }
-html.qn-active.qn-reader #toast-container .toast-title { font-weight: 600; font-size: 12px; margin-bottom: 3px; }
-html.qn-active.qn-reader #toast-container :is(.toast-close-button,.action-loader-stop) { color: inherit !important; min-width: 28px; min-height: 28px; }
+html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button:hover { background: var(--qn-soft) !important; }
+html.qn-active.qn-reader :is(#qr--bar, #qr--popout) :is(.qr--button-expander, .qr--button i) { color: var(--qn-muted) !important; background: transparent !important; }
+html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--hover-item { background: var(--qn-bg) !important; color: var(--qn-text) !important; border: 1px solid var(--qn-line) !important; }
+@media (max-width: 600px) { html.qn-active #sheld#sheld#sheld { border-inline: 0 !important; } }
