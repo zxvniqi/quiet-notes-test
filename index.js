@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.8.0-beta.1';
+  const VERSION = '2.9.0-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
@@ -218,6 +218,56 @@
       if (bottomEdge.previousElementSibling !== chat) chat.after(bottomEdge);
     }
 
+    // ── E-book chrome: its own app bar and contents list. The native top bar stays hidden;
+    //    each row presses the matching native control, so every handler is the original one. ──
+    const icon = body => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>';
+    function barButton(label, body, handler) {
+      const item = button('', handler);
+      item.innerHTML = icon(body);
+      item.title = label;
+      item.setAttribute('aria-label', label);
+      return item;
+    }
+    const drawerNames = [
+      ['#leftNavDrawerIcon', '작성 도구'], ['#API-status-top', '연결'], ['.fa-font', '서식'], ['#WIDrawerIcon', '사전'],
+      ['.fa-user-cog', '환경 설정'], ['.fa-panorama', '배경'], ['.fa-cubes', '확장'], ['.fa-face-smile', '프로필'], ['#rightNavDrawerIcon', '책장'],
+    ];
+    const chatActions = [
+      ['#extensionTopBarChatManager, #option_select_chat', '기록'], ['#extensionTopBarNewChat, #option_start_new_chat', '새 노트'],
+      ['#extensionTopBarRenameChat', '제목 바꾸기'], ['#extensionTopBarCloseChat, #option_close_chat', '덮기'], ['#extensionTopBarDeleteChat', '삭제'],
+    ];
+    const press = node => (node.closest('.drawer-toggle') || node).click();
+    const toc = el('div', { id: 'qn-toc', hidden: true });
+    function showToc(show) {
+      if (show) {
+        const section = (title, rows) => rows.length ? [el('h4', { textContent: title }), el('div', { className: 'qn-toc-list' }, ...rows.map(([node, text]) => button(text, () => { showToc(false); press(node); })))] : [];
+        const actions = chatActions.map(([selector, text]) => [document.querySelector(selector), text]).filter(([node]) => node);
+        const drawers = [...document.querySelectorAll('#top-settings-holder .drawer-icon')].map(node => [node, drawerNames.find(([selector]) => node.matches(selector))?.[1] || node.title || '기타']);
+        toc.replaceChildren(...section('이 문서', actions), ...section('서재', drawers));
+      }
+      toc.hidden = !show;
+    }
+    const readerTitle = el('span', { className: 'qn-reader-title' });
+    const searchButton = barButton('검색', '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>', () => {
+      const on = root.classList.toggle('qn-search');
+      if (on) document.getElementById('extensionTopBarSearchInput')?.focus();
+    });
+    const readerBar = el('nav', { id: 'qn-reader-bar' },
+      barButton('책장', '<path d="M15 5l-7 7 7 7"/>', () => { showToc(false); const shelf = document.getElementById('rightNavDrawerIcon'); if (shelf) press(shelf); }),
+      readerTitle, searchButton,
+      barButton('목차', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".7"/><circle cx="4.5" cy="12" r=".7"/><circle cx="4.5" cy="18" r=".7"/>', () => showToc(toc.hidden)),
+      barButton('보기 설정', '<path d="M3 18l4.5-11L12 18M4.6 14.5h5.8"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M20 12.5V18"/>', () => { showToc(false); openDialog(true); }));
+    readerBar.setAttribute('aria-label', '읽기 도구');
+    document.body.append(readerBar, toc);
+
+    // The native top bar keeps the theme's own height; the chat starts right under it.
+    const nativeBar = document.getElementById('top-settings-holder');
+    const barObserver = new ResizeObserver(() => {
+      const height = nativeBar.offsetHeight;
+      if (state.enabled && height) root.style.setProperty('--qn-bar-h', height + 'px');
+    });
+    if (nativeBar) barObserver.observe(nativeBar);
+
     let openActions = null;
     // Change text nodes only: keep the theme's typography, decoration and DOM intact.
     const nameText = new WeakMap();
@@ -330,9 +380,10 @@
     document.addEventListener('pointerdown', e => {
       if (openActions && !openActions.contains(e.target)) closeActions();
       if (!chooser.hidden && !chooser.contains(e.target) && !wandContainer.contains(e.target)) showChooser(false);
+      if (!toc.hidden && !toc.contains(e.target) && !readerBar.contains(e.target)) showToc(false);
     }, {signal: abort.signal});
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeActions(); showChooser(false); openDialog(false); }
+      if (e.key === 'Escape') { closeActions(); showChooser(false); showToc(false); openDialog(false); }
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyM' && !e.repeat) { e.preventDefault(); toggleMode(); }
     }, {signal: abort.signal});
     // E-book footer shows only the reading position, like a reader app's page indicator.
@@ -341,7 +392,9 @@
       progressFrame = 0;
       if (!state.enabled || !state.reader || !chat) return;
       const range = chat.scrollHeight - chat.clientHeight;
-      progress.textContent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
+      const percent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
+      progress.textContent = percent;
+      bottomEdge.style.setProperty('--qn-read', percent);
     }
     chat?.addEventListener('scroll', () => { if (!progressFrame && state.enabled && state.reader) progressFrame = requestAnimationFrame(updateProgress); }, {passive: true, signal: abort.signal});
 
@@ -404,6 +457,7 @@
       for (const [name, value] of Object.entries(lookAttrs)) {
         if (state.enabled) root.setAttribute(name, value()); else root.removeAttribute(name);
       }
+      if (!state.enabled) root.style.removeProperty('--qn-bar-h');
     }
     function syncSettings() {
       const reader = state.enabled && state.reader;
@@ -433,10 +487,11 @@
       settingsObserver.disconnect();
       actionsObserver.disconnect();
       blueObserver.disconnect();
+      barObserver.disconnect();
       closeActions();
       state.enabled = false;
       mountEdges();
-      for (const node of [dialog, chooser, wandContainer, settingsPanel]) node.remove();
+      for (const node of [dialog, chooser, readerBar, toc, wandContainer, settingsPanel]) node.remove();
       refreshShells();
       syncBlue();
       applyLooks();
@@ -488,6 +543,9 @@
       if (lastMedia !== media) { refreshShells(); lastMedia = media; }
       progress.textContent = '';
       if (reader) updateProgress();
+      readerTitle.textContent = state.titleReader || looks.titleReader.value;
+      searchButton.hidden = !document.getElementById('extensionTopBarSearchInput');
+      if (!reader || !top) { showToc(false); root.classList.remove('qn-search'); }
       for (const [node, open] of [[topEdge, top], [bottomEdge, compose]]) node.firstElementChild.setAttribute('aria-expanded', String(open));
       const modeText = state.enabled ? '일코 모드 끄기' : '일코 모드 켜기';
       settingsToggle.textContent = chooserMode.textContent = modeText;

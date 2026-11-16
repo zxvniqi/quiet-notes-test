@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.8.0-beta.1');
-:root { --qn-css: "2.8.0-beta.1"; }
+@import url('./icons.css?v=2.9.0-beta.1');
+:root { --qn-css: "2.9.0-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -60,11 +60,10 @@ html.qn-active.qn-reader[data-qn-paper="night"] {
   --shadowWidth: 0;
   --qn-header: env(safe-area-inset-top, 0px);
   --qn-tools: 0px;
-  --topBarBlockSize: 44px;
-  --topBarIconSize: 20px;
   --sheldWidth: min(900px, 100vw);
 }
-:root.qn-active.qn-top-visible, .qn-active.qn-top-visible body { --qn-tools: 44px; }
+:root.qn-active.qn-top-visible, .qn-active.qn-top-visible body { --qn-tools: var(--qn-bar-h, var(--topBarBlockSize, 44px)); }
+:root.qn-active.qn-reader.qn-top-visible, .qn-active.qn-reader.qn-top-visible body { --qn-tools: 52px; }
 .qn-active body { background: var(--qn-page) !important; color: var(--qn-text); text-shadow: none !important; }
 /* Native GPU transforms must not make fixed controls follow document scrolling. */
 html.qn-active { transform: none !important; perspective: none !important; }
@@ -158,7 +157,7 @@ html.qn-active:not(.qn-reader) #form_sheld #ppc-btn { filter: grayscale(1) opaci
 /* ── Native top bar and drawers ── */
 html.qn-active #top-settings-holder#top-settings-holder {
   position: fixed !important; top: var(--qn-header) !important; left: 0 !important; right: 0 !important;
-  width: min(900px, 100vw) !important; height: 44px !important; min-height: 44px !important;
+  width: min(900px, 100vw) !important; height: auto !important; min-height: var(--topBarBlockSize, 44px) !important;
   display: flex !important; flex-wrap: nowrap !important; justify-content: center !important;
   margin: 0 auto !important; padding: 0 !important; transform: none !important;
   opacity: 1 !important; visibility: visible !important;
@@ -168,16 +167,12 @@ html.qn-active #top-settings-holder::after { display: none !important; }
 .qn-active #top-bar { top: var(--qn-header) !important; background: var(--qn-bar) !important; box-shadow: none !important; }
 html.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder#top-settings-holder, #top-bar#top-bar, #extensionTopBar#extensionTopBar, #extensionConnectionProfiles) { display: none !important; }
 .qn-active :is(.drawer-content, #left-nav-panel, #right-nav-panel) {
-  top: calc(var(--qn-header) + 44px) !important;
-  max-height: calc(100dvh - var(--qn-header) - 44px) !important;
+  top: calc(var(--qn-header) + var(--qn-tools)) !important;
+  max-height: calc(100dvh - var(--qn-header) - var(--qn-tools)) !important;
   text-shadow: none;
 }
 html.qn-active #top-settings-holder .drawer-icon { color: var(--qn-muted) !important; opacity: 1 !important; filter: none !important; }
 html.qn-active #top-settings-holder .drawer-icon:is(.openIcon, :hover) { color: var(--qn-text) !important; }
-@media (max-width: 600px) {
-  .qn-active #top-settings-holder .drawer { flex: 1 1 0; min-width: 0; }
-  .qn-active #top-settings-holder .drawer-icon { width: 100% !important; }
-}
 
 /* ── Chat Top Bar: one line, folds with the tools ── */
 html.qn-active.qn-active.qn-top-visible #extensionTopBar#extensionTopBar {
@@ -188,22 +183,16 @@ html.qn-active.qn-active.qn-top-visible #extensionTopBar#extensionTopBar {
   background: var(--qn-bar) !important; color: var(--qn-muted) !important;
   border: 0 !important; border-bottom: 1px solid var(--qn-line) !important; box-shadow: none !important;
   flex-wrap: nowrap !important; overflow: visible !important; box-sizing: border-box !important;
-  white-space: nowrap !important; min-height: 36px !important; gap: 2px !important;
-  padding: 2px 6px !important; align-items: center !important;
+  white-space: nowrap !important; align-items: center !important;
 }
-html.qn-active #extensionTopBar > * { box-sizing: border-box !important; margin: 0 !important; text-shadow: none !important; }
+html.qn-active #extensionTopBar > * { text-shadow: none !important; }
 html.qn-active #extensionTopBar :is(input, select) {
   flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important; max-width: none !important; padding-inline: 4px !important;
   text-overflow: ellipsis; color: var(--qn-text) !important; background: transparent !important; box-shadow: none !important;
   border: 0 !important; border-bottom: 1px solid var(--qn-line) !important; border-radius: 0 !important;
 }
 html.qn-active #extensionTopBar input::placeholder { color: var(--qn-muted) !important; }
-html.qn-active #extensionTopBar > i {
-  display: inline-flex !important; align-items: center !important; justify-content: center !important;
-  flex: 0 0 clamp(23px, 6vw, 32px) !important; width: clamp(23px, 6vw, 32px) !important; min-width: 0 !important;
-  height: 32px !important; min-height: 32px !important; padding: 0 !important; font-size: clamp(13px, 3.7vw, 17px) !important;
-  color: var(--qn-muted) !important; background: transparent !important; border: 0 !important;
-}
+html.qn-active #extensionTopBar > i { flex: 0 0 auto !important; color: var(--qn-muted) !important; background: transparent !important; border: 0 !important; }
 
 /* ── Visibility toggles ── */
 html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld { display: none !important; }
@@ -423,19 +412,8 @@ html.qn-active.qn-reader #chat .mes .mes_edit_buttons { position: relative; z-in
 html.qn-active.qn-reader #chat .mes .mes_buttons { margin-bottom: 8px !important; }
 html.qn-active.qn-reader #chat .mes .mes_text :is(blockquote, pre) { background: var(--qn-soft) !important; color: var(--qn-quote) !important; }
 
-/* 목차: native top bar as a reader toolbar */
-html.qn-active.qn-reader #top-settings-holder .drawer-icon { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
-html.qn-active.qn-reader #top-settings-holder .drawer-icon.openIcon { box-shadow: inset 0 -2px 0 var(--qn-text) !important; }
-
-/* Chat Top Bar: chat name hidden behind redacted lines */
-html.qn-active.qn-reader #extensionTopBar#extensionTopBar #extensionTopBarChatName {
-  color: transparent !important; text-shadow: none !important; -webkit-appearance: none; appearance: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='8'%3E%3Cg fill='%238c8373' fill-opacity='.55'%3E%3Crect width='30' height='3' y='2.5' rx='1.5'/%3E%3Crect x='36' width='18' height='3' y='2.5' rx='1.5'/%3E%3Crect x='60' width='14' height='3' y='2.5' rx='1.5'/%3E%3C/g%3E%3C/svg%3E") no-repeat 4px center / 76px 8px !important;
-}
-html.qn-active.qn-reader #extensionTopBarChatName option { color: initial; }
-
 /* 메모: composer glyphs muted; stop button as a quiet pause mark */
-html.qn-active.qn-reader #send_form :is(#leftSendForm > *, #rightSendForm > *, .dm-compact--button, #llm_translate_input_button) { color: var(--qn-muted) !important; text-shadow: none !important; }
+html.qn-active.qn-reader #send_form :is(#leftSendForm > *, #rightSendForm > *, .dm-compact--button, #llm_translate_input_button) { color: var(--qn-text) !important; text-shadow: none !important; }
 html.qn-active.qn-reader #send_form #send_but { color: var(--qn-text) !important; }
 html.qn-active.qn-reader #send_form #mes_stop { color: var(--qn-text) !important; background: transparent !important; border-color: transparent !important; box-shadow: none !important; filter: none !important; }
 html.qn-active.qn-reader #send_form #mes_stop > i { animation: qn-action-pulse 1.6s ease-in-out infinite; }
@@ -457,3 +435,65 @@ html.qn-active.qn-reader:not(.qn-reader-tools-visible) #chat .mes .mes_block > :
 /* Tavern Helper leaves a "show code block" button where an embed is hidden. */
 html.qn-active:not(.qn-embeds-visible) #chat .mes_text .TH-collapse-code-block-button { display: none !important; }
 html.qn-active.qn-reader #chat .mes:is(.last_mes, :last-child) { padding-bottom: 24px !important; }
+
+/* ══ E-book chrome: a reader app's own bar and contents list ══
+   The native top bar and Chat Top Bar are not shown; their controls are pressed from the list. */
+#qn-reader-bar, #qn-toc { display: none; text-shadow: none; }
+html.qn-active.qn-reader.qn-top-visible #qn-reader-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 3006; display: flex; align-items: center; gap: 2px;
+  width: min(780px, 100vw); height: calc(52px + env(safe-area-inset-top, 0px)); margin: 0 auto; box-sizing: border-box;
+  padding: env(safe-area-inset-top, 0px) 4px 0; background: var(--qn-bar); color: var(--qn-text);
+  border-bottom: 1px solid var(--qn-line);
+}
+#qn-reader-bar > button {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  margin: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer;
+}
+#qn-reader-bar > button[hidden] { display: none; }
+#qn-reader-bar > button:is(:hover, :focus-visible) { background: var(--qn-soft); }
+#qn-reader-bar .qn-reader-title { flex: 1 1 auto; min-width: 0; padding: 0 6px; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.qn-active.qn-reader.qn-top-visible #qn-toc:not([hidden]) {
+  position: fixed; top: calc(52px + env(safe-area-inset-top, 0px)); left: 0; right: 0; z-index: 3006; display: block;
+  width: min(780px, 100vw); max-height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); margin: 0 auto; box-sizing: border-box;
+  padding: 4px 22px 22px; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--qn-bg); color: var(--qn-text); border-bottom: 1px solid var(--qn-line); box-shadow: 0 14px 30px #0000001f;
+  counter-reset: qn-toc;
+}
+#qn-toc h4 { margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--qn-div); font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--qn-muted); }
+#qn-toc .qn-toc-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 26px; }
+#qn-toc .qn-toc-list > button {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; margin: 0; padding: 0 2px;
+  border: 0; border-bottom: 1px dotted var(--qn-div); border-radius: 0; background: transparent; color: inherit;
+  font: inherit; font-size: 15px; text-align: left; cursor: pointer; counter-increment: qn-toc;
+}
+#qn-toc .qn-toc-list > button::after { content: counter(qn-toc); font-size: 11px; color: var(--qn-muted); font-variant-numeric: tabular-nums; }
+#qn-toc .qn-toc-list > button:is(:hover, :focus-visible) { color: var(--qn-info); }
+
+/* Native top bar: no row of its own; its panels open under the reader bar. */
+html.qn-active.qn-active.qn-reader #top-settings-holder#top-settings-holder#top-settings-holder {
+  display: block !important; height: 0 !important; min-height: 0 !important; overflow: visible !important;
+  top: calc(var(--qn-header) + var(--qn-tools)) !important; background: none !important; border: 0 !important;
+}
+html.qn-active.qn-reader #top-settings-holder .drawer-toggle,
+html.qn-active.qn-active.qn-reader #top-bar#top-bar#top-bar { display: none !important; }
+/* Chat Top Bar: only its search field, when asked for. */
+html.qn-active.qn-active.qn-reader:not(.qn-search) #extensionTopBar#extensionTopBar#extensionTopBar { display: none !important; }
+html.qn-active.qn-reader.qn-search #extensionTopBar#extensionTopBar > :not(#extensionTopBarSearchInput) { display: none !important; }
+html.qn-active.qn-reader.qn-search #extensionTopBar#extensionTopBar { padding: 6px var(--qn-r-margin, 22px) !important; background: var(--qn-bg) !important; }
+html.qn-active.qn-reader.qn-search #extensionTopBarSearchInput { min-height: 36px !important; }
+
+/* 메모: the composer as a note sheet. Buttons keep the theme's size and place. */
+html.qn-active.qn-reader #form_sheld { border-top: 1px solid var(--qn-line); background: var(--qn-bar); }
+html.qn-active.qn-reader #form_sheld::before {
+  content: '메모'; display: block; padding: 10px 18px 2px; font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--qn-muted);
+}
+html.qn-active.qn-reader #send_form { border-top: 0 !important; }
+
+/* Reading position: a hairline along the bottom edge. */
+html.qn-reader .qn-edge-bottom::after {
+  content: ''; position: absolute; left: 0; bottom: 0; width: var(--qn-read, 0%); height: 2px; background: var(--qn-div); pointer-events: none;
+}
+html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea {
+  background: var(--qn-bg) !important; border: 1px solid var(--qn-line) !important; border-radius: 8px !important;
+}
+html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea:focus { border-color: var(--qn-muted) !important; }
