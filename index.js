@@ -2,35 +2,45 @@
 (() => {
   'use strict';
   const document = window.document;
-  const ID = 'qn-controls';
+  const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
+  const VERSION = '2.8.0-beta.1';
   if (document.getElementById(ID)) return;
-  const defaults = { enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true, reader: false, readerTop: false, readerCompose: false, readerTools: false };
+  const flags = {
+    enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
+    reader: false, readerTop: false, readerCompose: false, readerTools: false,
+    // Typography is the theme's (and Font Manager's) unless these are switched on.
+    noteType: false, readerType: false, readerIndent: true,
+  };
   // Look customisation. Stored per device with the mode flags.
   const looks = {
     titleNote: { value: '메모', max: 20 }, titleReader: { value: '서재', max: 20 },
     nameBot: { value: '메모', max: 12 }, nameUser: { value: '작성', max: 12 },
     toast: { value: 'top', options: ['top', 'bottom'] },
     noteColor: { value: 'white', options: ['white', 'gray', 'dark'] },
-    noteSize: { value: 16, min: 12, max: 22, step: 1 }, noteLine: { value: 1.75, min: 1.3, max: 2.2, step: 0.05 },
+    noteFont: { value: '', font: true },
+    noteSize: { value: 16, min: 12, max: 22, step: 1 }, noteLine: { value: 1.7, min: 1.3, max: 2.2, step: 0.05 },
     noteDivider: { value: 'line', options: ['line', 'short', 'stars', 'none'] },
     paper: { value: 'paper', options: ['paper', 'white', 'sepia', 'gray', 'night'] },
+    readerFont: { value: '', font: true },
     readerSize: { value: 15, min: 12, max: 22, step: 1 }, readerLine: { value: 1.7, min: 1.3, max: 2.2, step: 0.05 },
-    readerPara: { value: 0.8, min: 0, max: 2, step: 0.1 }, readerMargin: { value: 22, min: 8, max: 56, step: 2 },
+    readerPara: { value: 0.6, min: 0, max: 2, step: 0.1 }, readerMargin: { value: 22, min: 8, max: 56, step: 2 },
     readerAlign: { value: 'left', options: ['left', 'justify'] },
     readerDivider: { value: 'stars', options: ['line', 'short', 'stars', 'none'] },
   };
-  let state = { ...defaults };
+  const fontName = /^[^;{}<>\\]{0,80}$/;
+  let state = { ...flags };
   for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
   function valid(key, value) {
     const spec = looks[key];
+    if (spec.font) return typeof value === 'string' && fontName.test(value);
     if (spec.options) return spec.options.includes(value);
     if (typeof spec.value === 'number') return typeof value === 'number' && value >= spec.min && value <= spec.max;
     return typeof value === 'string' && value.length <= spec.max;
   }
   try {
     const saved = JSON.parse(window.localStorage.getItem(KEY) || '{}');
-    for (const key of Object.keys(defaults)) if (typeof saved[key] === 'boolean') state[key] = saved[key];
+    for (const key of Object.keys(flags)) if (typeof saved[key] === 'boolean') state[key] = saved[key];
     for (const key of Object.keys(looks)) if (valid(key, saved[key])) state[key] = saved[key];
   } catch { /* Storage may be unavailable in private browsing. */ }
   // Apply the saved mode as soon as this module loads, before constructing controls.
@@ -40,168 +50,173 @@
     if (document.getElementById(ID)) return;
     const root = document.documentElement;
     const abort = new AbortController();
-    const bar = document.createElement('nav');
-    bar.id = ID;
-    bar.setAttribute('aria-label', '화면 표시');
-    const brand = document.createElement('span');
-    brand.className = 'qn-brand';
-    brand.textContent = 'Note';
-    bar.append(brand);
-    function button(text, description, handler) {
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.textContent = text;
-      item.title = description;
-      item.setAttribute('aria-label', description);
+    const chat = document.getElementById('chat');
+    function el(tag, props = {}, ...children) {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...children);
+      return node;
+    }
+    function button(text, handler, className = '') {
+      const item = el('button', { type: 'button', textContent: text, className });
       item.addEventListener('click', handler);
       return item;
     }
     const toggleMode = () => { state.enabled = !state.enabled; apply(); };
-    const topButton = button('도구', '상단 도구 열기/접기', () => { const key = state.reader ? 'readerTop' : 'top'; state[key] = !state[key]; apply(); });
-    // Deliberately do not focus the textarea: avoid opening the phone keyboard.
-    const composeButton = button('입력', '입력 바 열기/접기', () => { const key = state.reader ? 'readerCompose' : 'compose'; state[key] = !state[key]; apply(); });
-    composeButton.id = 'qn-input-toggle';
-    composeButton.setAttribute('aria-controls', 'form_sheld');
-    const modeButton = button('일코 모드 끄기', '일코 모드 끄기', toggleMode);
-    modeButton.id = 'qn-mode-toggle';
-    // Header tools stay behind a small ··· in both modes; outside click or Escape folds them.
-    const moreButton = button('···', '메뉴 펼치기/접기', () => setMenu(!bar.classList.contains('qn-menu-open')));
-    moreButton.className = 'qn-more';
-
-    const wandToggle = document.createElement('div');
-    wandToggle.setAttribute('role', 'button');
-    wandToggle.tabIndex = 0;
-    wandToggle.title = '일코 모드 켜기/끄기';
-    wandToggle.addEventListener('click', toggleMode);
-    wandToggle.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wandToggle.click(); }
-    });
-    wandToggle.id = 'qn-wand-toggle';
-    wandToggle.className = 'list-group-item flex-container flexGap5';
-    const wandIcon = document.createElement('div');
-    wandIcon.className = 'extensionsMenuExtensionButton fa-fw fa-solid fa-file-lines';
-    wandIcon.setAttribute('aria-hidden', 'true');
-    const wandLabel = document.createElement('span');
-    wandToggle.replaceChildren(wandIcon, wandLabel);
-    const wandContainer = document.createElement('div');
-    wandContainer.id = 'qn-wand-container';
-    wandContainer.className = 'extension_container';
-    wandContainer.append(wandToggle);
-    function mountWand() {
-      const menu = document.getElementById('extensionsMenu');
-      if (!menu) return false;
-      if (wandContainer.parentElement !== menu) menu.append(wandContainer);
-      return true;
+    // A browser may keep an older stylesheet after an update; reload it once when its version tag differs.
+    const styleLink = [...document.querySelectorAll('link[rel="stylesheet"]')].find(link => /\/quiet-notes[^/]*\/style\.css$/.test(link.getAttribute('href') || ''));
+    function refreshStyle() {
+      if (getComputedStyle(root).getPropertyValue('--qn-css').replace(/["'\s]/g, '') === VERSION) return;
+      const fresh = styleLink.cloneNode();
+      fresh.href = styleLink.getAttribute('href') + '?v=' + VERSION;
+      fresh.addEventListener('load', () => styleLink.remove(), {once: true});
+      styleLink.after(fresh);
     }
-    const wandObserver = new MutationObserver(() => { if (mountWand()) wandObserver.disconnect(); });
-    if (!mountWand()) wandObserver.observe(document.body, {childList: true, subtree: true});
+    if (styleLink?.sheet) refreshStyle(); else styleLink?.addEventListener('load', refreshStyle, {once: true});
 
-    const details = document.createElement('details');
-    details.id = 'qn-options';
-    const summary = document.createElement('summary');
-    summary.textContent = '보기';
-    summary.title = '이미지와 화면 표시 설정';
-    const panel = document.createElement('div');
-    panel.className = 'qn-panel';
-    const toggles = {};
-    for (const [key, text] of [
-      ['avatars', '프로필 사진 표시'], ['media', '본문 이미지·에셋 표시'],
-      ['embeds', '임베드 패널 표시'], ['names', '대화 이름 표시'],
-      ['actions', '메시지 작업 버튼 접기'], ['reader', '전자책 모드'],
-      ['readerTools', '전자책 편집 도구 표시'],
-    ]) {
-      const label = document.createElement('label');
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.addEventListener('change', () => { state[key] = input.checked; apply(); });
-      label.append(input, document.createTextNode(text));
-      panel.append(label);
-      toggles[key] = input;
-    }
-    panel.append(modeButton);
-    details.append(summary, panel);
-    bar.append(topButton, composeButton, details, moreButton);
-    document.body.append(bar);
-    function setMenu(open) {
-      bar.classList.toggle('qn-menu-open', open);
-      moreButton.setAttribute('aria-expanded', String(open));
-      if (!open) details.open = false;
-    }
-
-    // Extension settings drawer: on/off plus look customisation (this device only).
-    const settingsPanel = document.createElement('div');
-    settingsPanel.id = 'qn-settings';
-    settingsPanel.className = 'inline-drawer';
-    settingsPanel.innerHTML = '<div class="inline-drawer-toggle inline-drawer-header"><b>Quiet Notes Test</b><div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div></div><div class="inline-drawer-content"></div>';
-    const settingsBody = settingsPanel.querySelector('.inline-drawer-content');
-    const settingsToggle = button('일코 모드 켜기', '일코 모드 켜기/끄기', toggleMode);
-    settingsToggle.className = 'menu_button qn-settings-mode';
-    const note = document.createElement('small');
-    note.className = 'qn-settings-note';
-    note.textContent = '꾸미기 설정은 이 기기에만 저장됩니다.';
-    settingsBody.append(settingsToggle, note);
+    // ── Settings: one body, shown in the Extensions tab drawer or moved into the dialog. ──
+    const settingsBody = el('div', { className: 'qn-settings-body' });
+    const settingsToggle = button('', toggleMode, 'menu_button qn-settings-mode');
+    settingsBody.append(settingsToggle);
     const fields = {};
     const labels = {
       top: '위', bottom: '아래', white: '흰색', gray: '회색', dark: '어둡게', line: '선', short: '짧은 선', stars: '별표', none: '없음',
       paper: '종이', sepia: '세피아', night: '야간', left: '왼쪽', justify: '양쪽',
     };
+    const fontLabels = { '': '기존 그대로', serif: '명조 계열', 'sans-serif': '고딕 계열' };
+    function fillFonts(select, current) {
+      const names = new Set(['', 'serif', 'sans-serif']);
+      try {
+        for (const face of document.fonts) {
+          const name = face.family.replace(/^["']|["']$/g, '');
+          if (fontName.test(name) && !/awesome|icon|symbol|emoji/i.test(name)) names.add(name);
+        }
+      } catch { /* FontFaceSet iteration is optional. */ }
+      names.add(current);
+      select.replaceChildren(...[...names].map(name => new Option(fontLabels[name] ?? name, name)));
+      select.value = current;
+    }
     function group(title, rows) {
-      const box = document.createElement('fieldset');
-      box.className = 'qn-settings-group';
-      const legend = document.createElement('legend');
-      legend.textContent = title;
-      box.append(legend);
+      const box = el('fieldset', { className: 'qn-settings-group' }, el('legend', { textContent: title }));
       for (const [key, text, unit = ''] of rows) {
         const spec = looks[key];
-        const row = document.createElement('label');
-        row.className = 'qn-settings-row';
-        const name = document.createElement('span');
-        name.textContent = text;
+        const row = el('label', { className: 'qn-settings-row' });
+        const name = el('span', { textContent: text });
         let input;
-        if (spec.options) {
-          input = document.createElement('select');
-          input.className = 'text_pole';
-          for (const value of spec.options) input.add(new Option(labels[value], value));
+        if (!spec) {
+          input = el('input', { type: 'checkbox' });
+          input.addEventListener('change', () => { state[key] = input.checked; apply(); });
+          row.classList.add('qn-settings-check');
+          row.append(input, name);
+        } else if (spec.font || spec.options) {
+          input = el('select', { className: 'text_pole' });
+          if (spec.options) for (const value of spec.options) input.add(new Option(labels[value], value));
           input.addEventListener('change', () => { state[key] = input.value; apply(); });
+          row.append(name, input);
         } else if (typeof spec.value === 'number') {
-          input = document.createElement('input');
-          Object.assign(input, { type: 'range', min: spec.min, max: spec.max, step: spec.step });
-          const out = document.createElement('output');
-          input.addEventListener('input', () => { state[key] = Number(input.value); apply(); });
-          input.qnOutput = out;
+          input = el('input', { type: 'range', min: spec.min, max: spec.max, step: spec.step });
+          input.qnOutput = el('output');
           input.qnUnit = unit;
-          row.append(name, input, out);
-          box.append(row);
-          fields[key] = input;
-          continue;
+          input.addEventListener('input', () => { state[key] = Number(input.value); apply(); });
+          row.append(name, input, input.qnOutput);
         } else {
-          input = document.createElement('input');
-          Object.assign(input, { type: 'text', className: 'text_pole', maxLength: spec.max, placeholder: spec.value });
+          input = el('input', { type: 'text', className: 'text_pole', maxLength: spec.max, placeholder: spec.value });
           input.addEventListener('input', () => { state[key] = input.value.trim().slice(0, spec.max); apply(); });
+          row.append(name, input);
         }
-        row.append(name, input);
         box.append(row);
         fields[key] = input;
       }
       settingsBody.append(box);
     }
+    group('보기', [['reader', '전자책 모드'], ['avatars', '프로필 사진 표시'], ['media', '본문 이미지·에셋 표시'], ['embeds', '임베드 패널 표시'], ['names', '대화 이름 표시'], ['actions', '메시지 작업 버튼 접기'], ['readerTools', '전자책 편집 도구 표시']]);
     group('공통', [['titleNote', '탭 제목'], ['titleReader', '전자책 탭 제목'], ['nameBot', '캐릭터 이름'], ['nameUser', '유저 이름'], ['toast', '알림 위치']]);
-    group('일반 일코', [['noteColor', '색'], ['noteSize', '글자 크기', 'px'], ['noteLine', '줄 간격'], ['noteDivider', '구분선']]);
-    group('전자책', [['paper', '종이'], ['readerSize', '글자 크기', 'px'], ['readerLine', '줄 간격'], ['readerPara', '문단 간격', 'em'], ['readerMargin', '좌우 여백', 'px'], ['readerAlign', '정렬'], ['readerDivider', '구분선']]);
-    const resetButton = button('꾸미기 기본값', '꾸미기 설정을 기본값으로', () => {
-      for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
-      apply();
-    });
-    resetButton.className = 'menu_button qn-settings-reset';
-    settingsBody.append(resetButton);
-    function mountSettings() {
-      const host = document.getElementById('extensions_settings2') || document.getElementById('extensions_settings');
-      if (!host) return false;
-      if (settingsPanel.parentElement !== host) host.append(settingsPanel);
-      return true;
+    group('일반 일코', [['noteColor', '색'], ['noteFont', '글꼴'], ['noteType', '글자 크기·줄 간격 직접 지정'], ['noteSize', '글자 크기', 'px'], ['noteLine', '줄 간격'], ['noteDivider', '구분선']]);
+    group('전자책', [['paper', '종이'], ['readerFont', '글꼴'], ['readerType', '글자 크기·줄 간격 직접 지정'], ['readerSize', '글자 크기', 'px'], ['readerLine', '줄 간격'], ['readerPara', '문단 간격', 'em'], ['readerIndent', '문단 첫 줄 들여쓰기'], ['readerMargin', '좌우 여백', 'px'], ['readerAlign', '정렬'], ['readerDivider', '구분선']]);
+    settingsBody.append(
+      button('꾸미기 기본값', () => {
+        for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
+        for (const key of ['noteType', 'readerType', 'readerIndent']) state[key] = flags[key];
+        apply();
+      }, 'menu_button qn-settings-reset'),
+      el('small', { className: 'qn-settings-note', textContent: '이 기기에만 저장됩니다.' }),
+    );
+    const drawerContent = el('div', { className: 'inline-drawer-content' }, settingsBody);
+    const settingsPanel = el('div', { id: ID, className: 'inline-drawer' },
+      el('div', { className: 'inline-drawer-toggle inline-drawer-header' }, el('b', { textContent: 'Quiet Notes Test' }), el('div', { className: 'inline-drawer-icon fa-solid fa-circle-chevron-down down' })),
+      drawerContent);
+    function mountOnce(mount) {
+      const observer = new MutationObserver(() => { if (mount()) observer.disconnect(); });
+      if (!mount()) observer.observe(document.body, {childList: true, subtree: true});
+      return observer;
     }
-    const settingsObserver = new MutationObserver(() => { if (mountSettings()) settingsObserver.disconnect(); });
-    if (!mountSettings()) settingsObserver.observe(document.body, {childList: true, subtree: true});
+    const settingsObserver = mountOnce(() => {
+      const host = document.getElementById('extensions_settings2') || document.getElementById('extensions_settings');
+      if (host && settingsPanel.parentElement !== host) host.append(settingsPanel);
+      return !!host;
+    });
+
+    // ── Dialog (settings) and chooser (wand menu → turn on/off or settings) ──
+    const dialogBody = el('div', { className: 'qn-dialog-body' });
+    const dialog = el('div', { id: 'qn-dialog', hidden: true },
+      el('div', { className: 'qn-dialog-card', role: 'dialog', ariaLabel: 'Quiet Notes 설정' },
+        el('div', { className: 'qn-dialog-head' }, el('b', { textContent: 'Quiet Notes' }), button('✕', () => openDialog(false), 'qn-dialog-close')),
+        dialogBody));
+    function openDialog(open) {
+      if (open === !dialog.hidden) return;
+      dialog.hidden = !open;
+      (open ? dialogBody : drawerContent).append(settingsBody);
+      if (open) syncSettings();
+    }
+    dialog.addEventListener('pointerdown', e => { if (e.target === dialog) openDialog(false); });
+    const chooserMode = button('', () => { showChooser(false); toggleMode(); });
+    const chooser = el('div', { id: 'qn-chooser', hidden: true }, chooserMode, button('설정', () => { showChooser(false); openDialog(true); }));
+    function showChooser(show) { chooser.hidden = !show; }
+    document.body.append(dialog, chooser);
+
+    const wandLabel = el('span', { textContent: 'Quiet Notes' });
+    const wandToggle = el('div', { id: 'qn-wand-toggle', className: 'list-group-item flex-container flexGap5', tabIndex: 0, title: '일코 모드 · 설정' },
+      el('div', { className: 'extensionsMenuExtensionButton fa-fw fa-solid fa-file-lines', ariaHidden: 'true' }), wandLabel);
+    wandToggle.setAttribute('role', 'button');
+    wandToggle.addEventListener('click', () => showChooser(true));
+    wandToggle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wandToggle.click(); }
+    });
+    const wandContainer = el('div', { id: 'qn-wand-container', className: 'extension_container' }, wandToggle);
+    const wandObserver = mountOnce(() => {
+      const menu = document.getElementById('extensionsMenu');
+      if (menu && wandContainer.parentElement !== menu) menu.append(wandContainer);
+      return !!menu;
+    });
+
+    // ── Edge grips: thin lines above and below the chat. Drag towards the page to reveal a bar, away to fold it. ──
+    const progress = el('span', { className: 'qn-progress' });
+    function edge(kind) {
+      const grip = el('div', { className: 'qn-edge-grip', tabIndex: 0, title: kind === 'top' ? '상단 도구: 아래로 끌어 열기, 위로 끌어 닫기' : '입력 바: 위로 끌어 열기, 아래로 끌어 닫기' });
+      grip.setAttribute('role', 'button');
+      const key = () => kind === 'top' ? (state.reader ? 'readerTop' : 'top') : (state.reader ? 'readerCompose' : 'compose');
+      const set = open => { if (state[key()] !== open) { state[key()] = open; apply(); } };
+      let startY = null;
+      grip.addEventListener('pointerdown', e => { startY = e.clientY; try { grip.setPointerCapture(e.pointerId); } catch { /* Synthetic events. */ } });
+      grip.addEventListener('pointermove', e => {
+        if (startY === null || Math.abs(e.clientY - startY) < 16) return;
+        set(kind === 'top' ? e.clientY > startY : e.clientY < startY);
+        startY = null; // One toggle per drag.
+      });
+      for (const type of ['pointerup', 'pointercancel']) grip.addEventListener(type, () => { startY = null; });
+      grip.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!state[key()]); }
+      });
+      return el('div', { className: 'qn-edge qn-edge-' + kind }, grip);
+    }
+    const topEdge = edge('top');
+    const bottomEdge = edge('bottom');
+    bottomEdge.append(progress);
+    function mountEdges() {
+      if (!chat) return;
+      if (!state.enabled) { topEdge.remove(); bottomEdge.remove(); return; }
+      if (topEdge.nextElementSibling !== chat) chat.before(topEdge);
+      if (bottomEdge.previousElementSibling !== chat) chat.after(bottomEdge);
+    }
 
     let openActions = null;
     // Change text nodes only: keep the theme's typography, decoration and DOM intact.
@@ -231,7 +246,6 @@
       openActions.querySelector('.extraMesButtonsHint')?.setAttribute('aria-expanded', 'false');
       openActions = null;
     }
-    const chat = document.getElementById('chat');
     // Hide only media-only wrappers. Never remove iframe nodes or reset their sessions.
     const mediaSelector = 'img,video,audio,canvas,svg,picture,iframe,object,embed';
     const shells = new Set();
@@ -315,22 +329,19 @@
     }, {capture: true, signal: abort.signal});
     document.addEventListener('pointerdown', e => {
       if (openActions && !openActions.contains(e.target)) closeActions();
-      if (!details.contains(e.target)) details.open = false;
-      if (!bar.contains(e.target)) setMenu(false);
+      if (!chooser.hidden && !chooser.contains(e.target) && !wandContainer.contains(e.target)) showChooser(false);
     }, {signal: abort.signal});
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeActions();
-      if (e.key === 'Escape' && details.open) { details.open = false; summary.focus(); }
-      else if (e.key === 'Escape' && bar.classList.contains('qn-menu-open')) { setMenu(false); moreButton.focus(); }
+      if (e.key === 'Escape') { closeActions(); showChooser(false); openDialog(false); }
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyM' && !e.repeat) { e.preventDefault(); toggleMode(); }
     }, {signal: abort.signal});
-    // E-book header shows only the reading position, like a reader app's page indicator.
+    // E-book footer shows only the reading position, like a reader app's page indicator.
     let progressFrame = 0;
     function updateProgress() {
       progressFrame = 0;
       if (!state.enabled || !state.reader || !chat) return;
       const range = chat.scrollHeight - chat.clientHeight;
-      brand.textContent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
+      progress.textContent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
     }
     chat?.addEventListener('scroll', () => { if (!progressFrame && state.enabled && state.reader) progressFrame = requestAnimationFrame(updateProgress); }, {passive: true, signal: abort.signal});
 
@@ -369,15 +380,22 @@
     const titleObserver = new MutationObserver(titleUpdate);
     if (title) titleObserver.observe(title, {childList: true, subtree: true, characterData: true});
 
-    // Look variables live on <html> only while incognito mode is on.
+    // Look variables and attributes live on <html> only while incognito mode is on.
+    const pick = (note, reader) => state.reader ? state[reader] : state[note];
+    const fontValue = () => {
+      const name = pick('noteFont', 'readerFont');
+      return /^(serif|sans-serif|monospace)$/.test(name) ? name : '"' + name.replace(/"/g, '') + '"';
+    };
     const lookVars = {
-      '--qn-n-size': () => state.noteSize + 'px', '--qn-n-line': () => String(state.noteLine),
-      '--qn-r-size': () => state.readerSize + 'px', '--qn-r-line': () => String(state.readerLine),
-      '--qn-r-para': () => state.readerPara + 'em', '--qn-r-margin': () => state.readerMargin + 'px',
+      '--qn-size': () => pick('noteSize', 'readerSize') + 'px', '--qn-line': () => String(pick('noteLine', 'readerLine')),
+      '--qn-font': fontValue, '--qn-r-para': () => state.readerPara + 'em', '--qn-r-margin': () => state.readerMargin + 'px',
     };
     const lookAttrs = {
       'data-qn-note': () => state.noteColor, 'data-qn-paper': () => state.paper, 'data-qn-toast': () => state.toast,
-      'data-qn-divider': () => state.reader ? state.readerDivider : state.noteDivider, 'data-qn-align': () => state.readerAlign,
+      'data-qn-divider': () => pick('noteDivider', 'readerDivider'), 'data-qn-align': () => state.readerAlign,
+      'data-qn-type': () => pick('noteType', 'readerType') ? 'on' : 'off',
+      'data-qn-font': () => pick('noteFont', 'readerFont') ? 'on' : 'off',
+      'data-qn-indent': () => state.readerIndent ? 'on' : 'off',
     };
     function applyLooks() {
       for (const [name, value] of Object.entries(lookVars)) {
@@ -388,10 +406,23 @@
       }
     }
     function syncSettings() {
+      const reader = state.enabled && state.reader;
       for (const [key, input] of Object.entries(fields)) {
+        if (input.type === 'checkbox') {
+          const forced = reader && ['avatars', 'media', 'embeds', 'names'].includes(key);
+          input.checked = !forced && state[key];
+          input.disabled = forced;
+          input.parentElement.hidden = key === 'readerTools' && !state.reader;
+          continue;
+        }
+        if (looks[key].font) { if (input !== document.activeElement) fillFonts(input, state[key]); continue; }
         if (input === document.activeElement && input.type === 'text') continue;
         input.value = String(state[key]);
-        if (input.qnOutput) input.qnOutput.textContent = state[key] + input.qnUnit;
+        if (input.qnOutput) {
+          input.qnOutput.textContent = state[key] + input.qnUnit;
+          const typed = { noteSize: 'noteType', noteLine: 'noteType', readerSize: 'readerType', readerLine: 'readerType' }[key];
+          if (typed) input.disabled = !state[typed];
+        }
       }
     }
 
@@ -403,10 +434,9 @@
       actionsObserver.disconnect();
       blueObserver.disconnect();
       closeActions();
-      bar.remove();
-      wandContainer.remove();
-      settingsPanel.remove();
       state.enabled = false;
+      mountEdges();
+      for (const node of [dialog, chooser, wandContainer, settingsPanel]) node.remove();
       refreshShells();
       syncBlue();
       applyLooks();
@@ -446,6 +476,7 @@
       root.classList.toggle('qn-reader', reader);
       root.classList.toggle('qn-reader-tools-visible', reader && state.readerTools);
       applyLooks();
+      mountEdges();
       syncBlue();
       const names = [state.enabled && !state.names, state.nameBot, state.nameUser].join('\n');
       if (lastNames !== names) { chat?.querySelectorAll('.name_text').forEach(updateName); lastNames = names; }
@@ -455,27 +486,12 @@
       }
       const media = [state.enabled, reader, state.media, state.embeds].join(':');
       if (lastMedia !== media) { refreshShells(); lastMedia = media; }
-      brand.textContent = 'Note';
+      progress.textContent = '';
       if (reader) updateProgress();
-      if (!state.enabled) setMenu(false);
-      topButton.textContent = reader ? '목차' : '도구';
-      composeButton.textContent = reader ? '메모' : '입력';
-      summary.textContent = reader ? 'Aa' : '보기';
-      summary.setAttribute('aria-label', reader ? '읽기 설정' : '보기');
-      topButton.setAttribute('aria-expanded', String(!state.enabled || top));
-      composeButton.setAttribute('aria-expanded', String(!state.enabled || compose));
-      topButton.disabled = composeButton.disabled = !state.enabled;
-      modeButton.setAttribute('aria-pressed', String(state.enabled));
-      wandLabel.textContent = state.enabled ? '일코 모드 끄기' : '일코 모드 켜기';
-      wandToggle.setAttribute('aria-pressed', String(state.enabled));
-      settingsToggle.textContent = state.enabled ? '일코 모드 끄기' : '일코 모드 켜기';
+      for (const [node, open] of [[topEdge, top], [bottomEdge, compose]]) node.firstElementChild.setAttribute('aria-expanded', String(open));
+      const modeText = state.enabled ? '일코 모드 끄기' : '일코 모드 켜기';
+      settingsToggle.textContent = chooserMode.textContent = modeText;
       settingsToggle.setAttribute('aria-pressed', String(state.enabled));
-      for (const [key, input] of Object.entries(toggles)) {
-        const forced = reader && ['avatars', 'media', 'embeds', 'names'].includes(key);
-        input.checked = !forced && state[key];
-        input.disabled = forced;
-        input.parentElement.hidden = key === 'readerTools' && !reader;
-      }
       syncSettings();
       restoreAnchor(anchor);
       titleUpdate();

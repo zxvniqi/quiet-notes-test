@@ -1,4 +1,5 @@
-@import url('./icons.css');
+@import url('./icons.css?v=2.8.0-beta.1');
+:root { --qn-css: "2.8.0-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -57,7 +58,7 @@ html.qn-active.qn-reader[data-qn-paper="night"] {
   --SmartThemeShadowColor: transparent !important;
   --SmartThemeBlurStrength: 0px !important;
   --shadowWidth: 0;
-  --qn-header: calc(40px + env(safe-area-inset-top, 0px));
+  --qn-header: env(safe-area-inset-top, 0px);
   --qn-tools: 0px;
   --topBarBlockSize: 44px;
   --topBarIconSize: 20px;
@@ -112,8 +113,6 @@ html.qn-active #chat .mes {
 .qn-active #chat .mes[is_user="true"] { background: var(--qn-user) !important; }
 .qn-active #chat .mes_block { min-width: 0; flex: 1; padding-left: 0 !important; }
 html.qn-active #chat .mes .mes_text {
-  font-size: var(--qn-n-size, 16px) !important;
-  line-height: var(--qn-n-line, 1.75) !important;
   overflow-wrap: anywhere;
   word-break: keep-all;
   color: var(--qn-text);
@@ -125,7 +124,7 @@ html.qn-active #chat .mes .mes_text {
 .qn-active #chat .mes_text pre { max-width: 100%; overflow-x: auto; white-space: pre; }
 .qn-active #chat .mes_text table { display: block; max-width: 100%; overflow-x: auto; }
 .qn-active #chat .mes_text a { color: var(--qn-info); text-decoration: underline; }
-.qn-active #chat .ch_name { font-size: 13px; color: var(--qn-muted); margin-bottom: 8px; }
+.qn-active #chat .ch_name { color: var(--qn-muted); margin-bottom: 8px; }
 .qn-active:not(.qn-top-visible) #chat .welcomePanel { display: none !important; }
 .qn-active #chat .welcomeHeaderLogo { display: none !important; }
 .qn-active #chat .welcomeHeaderVersionDisplay { font-size: 0 !important; }
@@ -151,7 +150,7 @@ html.qn-active[data-qn-divider="stars"] #chat .mes:not(.last_mes):not(:last-chil
 /* ── Composer: colours only. Icon size and position stay the theme's. ── */
 .qn-active #form_sheld { flex: 0 0 auto; margin: 0; }
 .qn-active #send_form { border: 0 !important; border-top: 1px solid var(--qn-line) !important; border-radius: 0 !important; background: var(--qn-bar) !important; box-sizing: border-box; }
-.qn-active #send_textarea { color: var(--qn-text) !important; background: transparent !important; border: 0 !important; box-shadow: none !important; font-size: 16px !important; max-height: min(220px, 32dvh) !important; }
+.qn-active #send_textarea { color: var(--qn-text) !important; background: transparent !important; border: 0 !important; box-shadow: none !important; max-height: min(220px, 32dvh) !important; }
 .qn-active #send_textarea::placeholder { color: var(--qn-muted); }
 /* Emoji-only buttons (Preset & Profile 🔌) cannot take a text colour; mute them instead. */
 html.qn-active:not(.qn-reader) #form_sheld #ppc-btn { filter: grayscale(1) opacity(.6) !important; }
@@ -227,78 +226,83 @@ html.qn-active:not(.qn-media-visible) #chat :is(.mes_img_container, .mes_img, .m
 html.qn-active:not(.qn-embeds-visible) #chat .mes_text :is(iframe, object, embed),
 html.qn-active #chat .mes_text .qn-hidden-shell { display: none !important; }
 
-/* ── Header: brand on the left, ··· on the right ── */
-#qn-controls {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  min-height: 40px;
-  padding: env(safe-area-inset-top, 0px) max(4px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
-  box-sizing: border-box;
-  border-bottom: 1px solid var(--qn-line);
-  background: var(--qn-bar);
-  color: var(--qn-muted);
-  font-size: 13px;
-  line-height: 1.4;
-  text-shadow: none;
+/* ── Typography: the theme's (and Font Manager's) unless chosen in settings ── */
+html.qn-active[data-qn-type="on"] #chat .mes .mes_text,
+html.qn-active[data-qn-type="on"] #chat .mes .mes_text > :is(p, blockquote, ul, ol),
+html.qn-active[data-qn-type="on"] #chat .mes .mes_text > :is(ul, ol) li { font-size: var(--qn-size) !important; line-height: var(--qn-line) !important; }
+html.qn-active[data-qn-font="on"] #chat .mes .mes_text,
+html.qn-active[data-qn-font="on"] #chat .mes .mes_text :is(p, li, blockquote, q, em, strong, b, i:not([class*="fa-"])) { font-family: var(--qn-font), sans-serif !important; }
+
+/* ── Edge grips: thin lines above and below the chat. Drag to reveal or fold the bars. ── */
+#sheld > .qn-edge { position: relative; flex: 0 0 0; height: 0; z-index: 2000; }
+.qn-edge-grip {
+  position: absolute; left: 50%; transform: translateX(-50%); width: min(60%, 240px); height: 30px;
+  touch-action: none; cursor: grab; -webkit-tap-highlight-color: transparent; outline: 0;
 }
-/* Just above the native top bar (3005): full-screen extensions and menus (9998+) cover it. */
-html.qn-installed #qn-controls {
-  position: fixed !important; display: flex !important; visibility: visible !important;
-  opacity: 1 !important; z-index: 3006 !important; transform: none !important;
-  overflow: visible !important; pointer-events: auto !important;
+.qn-edge-top > .qn-edge-grip { top: 0; }
+.qn-edge-bottom > .qn-edge-grip { bottom: 0; height: 36px; }
+.qn-edge-grip::before {
+  content: ''; position: absolute; left: 50%; width: 40px; height: 3px; margin-left: -20px;
+  border-radius: 2px; background: var(--qn-div); opacity: .75;
 }
-html.qn-installed:not(.qn-active) #qn-controls { display: none !important; }
-#qn-controls .qn-brand { flex: 1 1 auto; min-width: 40px; font-weight: 600; letter-spacing: .02em; color: var(--qn-text); }
-#qn-controls button, #qn-controls summary {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 40px; min-width: 44px; padding: 0 10px; margin: 0; box-sizing: border-box;
-  color: var(--qn-muted); background: transparent; border: 0; border-radius: 6px;
-  font: inherit; cursor: pointer; list-style: none; box-shadow: none; text-shadow: none; touch-action: manipulation;
+.qn-edge-top > .qn-edge-grip::before { top: 7px; }
+.qn-edge-bottom > .qn-edge-grip::before { bottom: 12px; }
+.qn-edge-grip:is(:hover, :active)::before { opacity: 1; background: var(--qn-muted); }
+.qn-edge-grip:focus-visible::before { outline: 2px solid var(--qn-info); outline-offset: 3px; }
+.qn-edge > .qn-progress {
+  position: absolute; right: 14px; bottom: 8px; font-size: 10px; line-height: 1; letter-spacing: .06em;
+  color: var(--qn-muted); font-variant-numeric: tabular-nums; pointer-events: none;
 }
-#qn-controls summary::-webkit-details-marker { display: none; }
-#qn-controls button:hover, #qn-controls summary:hover { background: var(--qn-soft); color: var(--qn-text); }
-#qn-controls button[aria-expanded="true"]:not(.qn-more) { color: var(--qn-text); box-shadow: inset 0 -2px 0 var(--qn-text); border-radius: 0; }
-#qn-controls button:disabled { opacity: .45; cursor: default; }
-#qn-controls :is(button, summary, input):focus-visible { outline: 2px solid var(--qn-info); outline-offset: -2px; }
-#qn-controls .qn-more { min-width: 40px; padding: 0; font-size: 17px; font-weight: 700; letter-spacing: .06em; }
-#qn-controls.qn-menu-open .qn-more { color: var(--qn-text); }
-#qn-controls:not(.qn-menu-open) > :is(#qn-options, button:not(.qn-more)) { display: none !important; }
-#qn-controls .qn-panel {
-  position: absolute; top: calc(100% + 6px); right: max(8px, env(safe-area-inset-right, 0px));
-  width: min(272px, calc(100vw - 16px)); padding: 10px; box-sizing: border-box;
-  background: var(--qn-bg); color: var(--qn-text); border: 1px solid var(--qn-line); border-radius: 10px;
-  box-shadow: 0 8px 28px #0000001f; max-height: calc(100dvh - var(--qn-header) - 16px); overflow-y: auto;
+html:not(.qn-reader) .qn-edge > .qn-progress { display: none; }
+
+/* ── Chooser (from the wand menu) and settings dialog — follow the active ST theme ── */
+#qn-chooser, #qn-dialog { text-shadow: none; }
+#qn-chooser[hidden], #qn-dialog[hidden] { display: none !important; }
+#qn-chooser {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); transform: translateX(-50%);
+  z-index: 30010; display: flex; gap: 6px; padding: 6px; border-radius: 12px;
+  background: var(--SmartThemeBlurTintColor); color: var(--SmartThemeBodyColor);
+  border: 1px solid var(--SmartThemeBorderColor); box-shadow: 0 6px 24px #00000040;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
 }
-#qn-controls [hidden] { display: none !important; }
-#qn-options:not([open]) > .qn-panel { display: none !important; }
-#qn-controls .qn-panel label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
-#qn-controls .qn-panel label:has(input:disabled) { opacity: .45; cursor: default; }
-#qn-controls .qn-panel input { width: 18px; height: 18px; accent-color: var(--qn-muted); }
-html.qn-installed #qn-controls #qn-mode-toggle {
-  display: inline-flex !important; visibility: visible !important; opacity: 1 !important; justify-content: flex-start;
-  min-height: 44px !important; width: 100%; margin-top: 6px; border-top: 1px solid var(--qn-line); border-radius: 0; box-shadow: none;
+#qn-chooser > button {
+  min-width: 96px; min-height: 44px; margin: 0; padding: 0 14px; border: 0; border-radius: 8px; cursor: pointer;
+  background: transparent; color: inherit; font: inherit; white-space: nowrap;
 }
-/* Chat Lobby closes its container independently of the overlay. Match both. */
-html:has(#chat-lobby-overlay[style*="display: flex"] #chat-lobby-container:not([style*="display: none"])) #qn-controls { display: none !important; }
+#qn-chooser > button + button { box-shadow: -1px 0 0 var(--SmartThemeBorderColor); border-radius: 0 8px 8px 0; }
+#qn-chooser > button:is(:hover, :focus-visible) { background: var(--white30a, #ffffff4d); }
+#qn-dialog {
+  position: fixed; inset: 0; z-index: 30010; display: flex; align-items: center; justify-content: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  box-sizing: border-box; background: #00000059;
+}
+#qn-dialog .qn-dialog-card {
+  display: flex; flex-direction: column; width: min(440px, 100%); max-height: 100%; box-sizing: border-box;
+  border-radius: 12px; overflow: hidden; background: var(--SmartThemeBlurTintColor); color: var(--SmartThemeBodyColor);
+  border: 1px solid var(--SmartThemeBorderColor); box-shadow: 0 10px 40px #00000059;
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+}
+#qn-dialog .qn-dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 6px 16px; border-bottom: 1px solid var(--SmartThemeBorderColor); }
+#qn-dialog .qn-dialog-close { min-width: 40px; min-height: 40px; margin: 0; border: 0; border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+#qn-dialog .qn-dialog-body { overflow-y: auto; padding: 8px 14px 14px; overscroll-behavior: contain; }
 @media (prefers-reduced-motion: reduce) {
-  #qn-controls *, .qn-active #sheld { transition: none !important; animation: none !important; }
+  .qn-active #sheld { transition: none !important; animation: none !important; }
 }
 
 /* ── Settings drawer (Extensions tab) — follows the active ST theme ── */
 .extension_block[data-name="/quiet-notes"] .extension_author { display: none !important; }
-#qn-settings .qn-settings-mode, #qn-settings .qn-settings-reset { width: 100%; margin: 6px 0; }
-#qn-settings .qn-settings-note { display: block; margin: 2px 0 8px; opacity: .7; }
-#qn-settings .qn-settings-group { margin: 8px 0; padding: 6px 10px 8px; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; }
-#qn-settings .qn-settings-group legend { padding: 0 4px; font-weight: 600; }
-#qn-settings .qn-settings-row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 36px; }
-#qn-settings .qn-settings-row :is(select, input[type="text"]) { grid-column: 2 / 4; width: 100%; margin: 0; }
-#qn-settings .qn-settings-row input[type="range"] { width: 100%; margin: 0; }
-#qn-settings .qn-settings-row output { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
+.qn-settings-body .qn-settings-mode, .qn-settings-body .qn-settings-reset { width: 100%; margin: 6px 0; }
+.qn-settings-body .qn-settings-note { display: block; margin: 2px 0 8px; opacity: .7; }
+.qn-settings-body .qn-settings-group { margin: 8px 0; padding: 6px 10px 8px; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; }
+.qn-settings-body .qn-settings-group legend { padding: 0 4px; font-weight: 600; }
+.qn-settings-body .qn-settings-row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 36px; }
+.qn-settings-body .qn-settings-row :is(select, input[type="text"]) { grid-column: 2 / 4; width: 100%; margin: 0; }
+.qn-settings-body .qn-settings-row input[type="range"] { width: 100%; margin: 0; }
+.qn-settings-body .qn-settings-row.qn-settings-check { display: flex; gap: 10px; cursor: pointer; }
+.qn-settings-body .qn-settings-row.qn-settings-check input { flex: none; margin: 0; }
+.qn-settings-body .qn-settings-row[hidden] { display: none; }
+.qn-settings-body .qn-settings-row:has(input:disabled) { opacity: .45; }
+.qn-settings-body .qn-settings-row output { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
 
 /* ── Message action panel: the native group, never moved or cloned ── */
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons {
@@ -389,10 +393,11 @@ html.qn-active #toast-container :is(.toast-close-button, .action-loader-stop) { 
 /* ══ E-book ══════════════════════════════════════════════════
    Effective visibility flags are forced off; saved preferences are preserved. */
 html.qn-active.qn-reader #sheld#sheld#sheld { width: min(780px, 100vw) !important; border: 0 !important; }
-html.qn-active.qn-reader #chat { padding: 8px var(--qn-r-margin, 22px) 28px !important; }
+html.qn-active.qn-reader #chat { padding: 18px var(--qn-r-margin, 22px) 44px !important; scrollbar-width: none; }
+html.qn-active.qn-reader #chat::-webkit-scrollbar { display: none; }
 html.qn-active.qn-reader #chat .mes {
   display: block !important; position: relative !important; width: 100% !important;
-  margin: 0 !important; padding: 22px 0 !important; min-height: 0 !important;
+  margin: 0 !important; padding: 24px 0 40px !important; min-height: 0 !important;
   background: transparent !important; border: 0 !important;
 }
 html.qn-active.qn-reader #chat .mes::before { display: none !important; }
@@ -402,13 +407,12 @@ html.qn-active.qn-reader :is(#chat-lobby-fab, .mpb-answer-meta-badge) { display:
 html.qn-active.qn-reader #chat .mes .mes_block { width: 100% !important; margin: 0 !important; padding: 0 !important; }
 html.qn-active.qn-reader #chat .mes .mes_text {
   margin: 0 !important; padding: 0 !important; border: 0 !important;
-  font-size: var(--qn-r-size, 15px) !important; line-height: var(--qn-r-line, 1.7) !important;
-  font-weight: 400; color: var(--qn-text) !important; letter-spacing: 0 !important;
+  color: var(--qn-text) !important;
   text-align: left; word-break: keep-all; overflow-wrap: anywhere;
 }
 html.qn-active.qn-reader[data-qn-align="justify"] #chat .mes .mes_text { text-align: justify; }
-html.qn-active.qn-reader #chat .mes .mes_text :is(p, li, blockquote) { font-size: inherit !important; line-height: inherit !important; }
-html.qn-active.qn-reader #chat .mes .mes_text p { margin: 0 0 var(--qn-r-para, .8em) !important; }
+html.qn-active.qn-reader #chat .mes .mes_text p { margin: 0 0 var(--qn-r-para, .6em) !important; }
+html.qn-active.qn-reader[data-qn-indent="on"] #chat .mes .mes_text p { text-indent: 1em; }
 html.qn-active.qn-reader #chat .mes .mes_text p:last-child { margin-bottom: 0 !important; }
 html.qn-active.qn-reader #chat .mes .mes_text p::first-letter { font-size: 1em !important; }
 html.qn-active.qn-reader #chat .mes :is(.mesAvatarWrapper, .avatar, .avatar-container, .mesIDDisplay, .mes_timer, .tokenCounterDisplay, .timestamp, .name_text, .mes_ghost, .mes_bias, .mes_file_wrapper, .mes_reasoning_details, .swipes-counter) { display: none !important; }
@@ -418,10 +422,6 @@ html.qn-active.qn-reader:not(.qn-reader-tools-visible) #chat .mes :is(.mes_butto
 html.qn-active.qn-reader #chat .mes .mes_edit_buttons { position: relative; z-index: 1; }
 html.qn-active.qn-reader #chat .mes .mes_buttons { margin-bottom: 8px !important; }
 html.qn-active.qn-reader #chat .mes .mes_text :is(blockquote, pre) { background: var(--qn-soft) !important; color: var(--qn-quote) !important; }
-
-/* Header: reading position on the left */
-html.qn-active.qn-reader #qn-controls .qn-brand { font-weight: 400; font-size: 11px; letter-spacing: .08em; color: var(--qn-muted); font-variant-numeric: tabular-nums; }
-html.qn-active.qn-reader #qn-controls summary { font-size: 15px; }
 
 /* 목차: native top bar as a reader toolbar */
 html.qn-active.qn-reader #top-settings-holder .drawer-icon { background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
@@ -452,3 +452,8 @@ html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--button:hover { backgrou
 html.qn-active.qn-reader :is(#qr--bar, #qr--popout) :is(.qr--button-expander, .qr--button i) { color: var(--qn-muted) !important; background: transparent !important; }
 html.qn-active.qn-reader :is(#qr--bar, #qr--popout) .qr--hover-item { background: var(--qn-bg) !important; color: var(--qn-text) !important; border: 1px solid var(--qn-line) !important; }
 @media (max-width: 600px) { html.qn-active #sheld#sheld#sheld { border-inline: 0 !important; } }
+/* E-book page: text only. Extension footers under a message return with the editing tools. */
+html.qn-active.qn-reader:not(.qn-reader-tools-visible) #chat .mes .mes_block > :not(.ch_name):not(.mes_text) { display: none !important; }
+/* Tavern Helper leaves a "show code block" button where an embed is hidden. */
+html.qn-active:not(.qn-embeds-visible) #chat .mes_text .TH-collapse-code-block-button { display: none !important; }
+html.qn-active.qn-reader #chat .mes:is(.last_mes, :last-child) { padding-bottom: 24px !important; }
