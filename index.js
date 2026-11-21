@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.3-beta.1';
+  const VERSION = '2.9.4-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
@@ -119,12 +119,14 @@
     }
     const set = (key, value) => { state[key] = value; apply(); };
     const row = (text, control, hint) => el('div', { className: 'qn-row' }, el('span', { className: 'qn-row-label', textContent: text }, ...(hint ? [el('small', { textContent: hint })] : [])), control);
-    function toggle(key, text, { forcedInReader = false, onlyReader = false } = {}) {
-      const sw = makeSwitch(checked => set(key, checked));
+    // hide: the switch reads "○○ 가리기", so on means the item is hidden (state stores "shown").
+    function toggle(key, text, { forcedInReader = false, onlyReader = false, hide = false } = {}) {
+      const sw = makeSwitch(checked => set(key, hide ? !checked : checked));
       const line = switchRow(text, sw);
       syncers.push(() => {
+        // The e-book always hides these: shown as switched on and locked.
         const forced = forcedInReader && state.enabled && state.reader;
-        sw.set(!forced && state[key], forced);
+        sw.set(forced ? hide : (hide ? !state[key] : state[key]), forced);
         line.hidden = onlyReader && !state.reader;
       });
       return line;
@@ -180,8 +182,8 @@
     const pages = {
       보기: [
         toggle('reader', '전자책 모드'),
-        toggle('avatars', '프로필 사진', { forcedInReader: true }), toggle('media', '본문 이미지·에셋', { forcedInReader: true }),
-        toggle('embeds', '임베드 패널', { forcedInReader: true }), toggle('names', '대화 이름', { forcedInReader: true }),
+        toggle('avatars', '프로필 사진 가리기', { forcedInReader: true, hide: true }), toggle('media', '본문 이미지·에셋 가리기', { forcedInReader: true, hide: true }),
+        toggle('embeds', '임베드 패널 가리기', { forcedInReader: true, hide: true }), toggle('names', '대화 이름 가리기', { forcedInReader: true, hide: true }),
         toggle('actions', '작업 버튼 접기'), toggle('readerTools', '전자책 편집 도구', { onlyReader: true }),
       ],
       일반: [
@@ -268,11 +270,20 @@
     });
 
     // ── Edge grips: thin lines above and below the chat. Drag towards the page to reveal a bar, away to fold it. ──
+    // A bar that opens under the finger must not take the rest of that tap (the phone's
+    // follow-up mouse/click events): presses elsewhere are dropped for a moment after a toggle.
+    let guardUntil = 0;
+    const guard = e => {
+      if (performance.now() < guardUntil && !e.target.closest?.('.qn-edge-grip')) {
+        e.preventDefault(); e.stopImmediatePropagation();
+      }
+    };
+    for (const type of ['click', 'mousedown', 'mouseup', 'touchend', 'pointerup', 'contextmenu']) document.addEventListener(type, guard, { capture: true, signal: abort.signal });
     function edge(kind) {
       const grip = el('div', { className: 'qn-edge-grip', tabIndex: 0, title: kind === 'top' ? '상단 도구 열기·닫기' : '입력 바 열기·닫기' });
       grip.setAttribute('role', 'button');
       const key = () => kind === 'top' ? (state.reader ? 'readerTop' : 'top') : (state.reader ? 'readerCompose' : 'compose');
-      const set = open => { if (state[key()] !== open) { state[key()] = open; apply(); } };
+      const set = open => { if (state[key()] !== open) { state[key()] = open; guardUntil = performance.now() + 450; apply(); } };
       // A tap flips the bar; a drag of 16px or more opens or folds it by direction.
       let startY = null;
       let moved = false;
@@ -284,7 +295,7 @@
         set(kind === 'top' ? e.clientY > startY : e.clientY < startY);
         startY = null; // One toggle per drag.
       });
-      grip.addEventListener('pointerup', () => { if (startY !== null && !moved) set(!state[key()]); startY = null; });
+      grip.addEventListener('pointerup', e => { if (startY !== null && !moved) { e.preventDefault(); set(!state[key()]); } startY = null; });
       grip.addEventListener('pointercancel', () => { startY = null; });
       grip.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!state[key()]); }

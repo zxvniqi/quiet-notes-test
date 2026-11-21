@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.3-beta.1');
-:root { --qn-css: "2.9.3-beta.1"; }
+@import url('./icons.css?v=2.9.4-beta.1');
+:root { --qn-css: "2.9.4-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -565,7 +565,3 @@ html.qn-active #form_sheld { position: relative; z-index: 2001; }
 /* Panels that rely on the theme's blur get a solid sheet, so text behind them can't show through. */
 html.qn-active .dm-compact--popup { background-color: var(--qn-bar) !important; }
 html.qn-active .dm-compact--popup :is(textarea, .dm-compact--content, .dm-compact--body) { background-color: var(--qn-bg) !important; color: var(--qn-text) !important; }
-/* Two scripts both want the spot right after the wand and keep swapping in the DOM:
-   while incognito mode is on, their places on screen are fixed. */
-html.qn-active #leftSendForm > #th-wi-active-monitor-trigger { order: 90 !important; }
-html.qn-active #leftSendForm > #stqa_qr_arrow { order: 91 !important; }
