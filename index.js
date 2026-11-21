@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.8-beta.1';
+  const VERSION = '2.9.9-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, meta: true, actions: true,
@@ -242,54 +242,74 @@
       }
     }
     const arrangeAll = () => chat?.querySelectorAll('.mes .mes_buttons').forEach(arrangeRow);
-    function menuPicker(modeKey) {
-      const list = el('div', { className: 'qn-menu-list' });
-      const box = el('details', { className: 'qn-menu-picker' }, el('summary', { className: 'qn-row', textContent: '··· 메뉴에 넣을 버튼' }), list);
+    // Two zones of icon chips, like the message's own row and its ··· menu; a tap moves a button across.
+    function menuPicker(modeKey, shownBy) {
+      const outZone = el('div', { className: 'qn-chips' });
+      const inZone = el('div', { className: 'qn-chips qn-chips-in' });
+      const caption = el('div', { className: 'qn-menu-caption' });
+      const box = el('div', { className: 'qn-menu-picker' },
+        el('div', { className: 'qn-zone-label', textContent: '밖에 보이는 버튼' }), outZone,
+        el('div', { className: 'qn-zone-label', textContent: '··· 메뉴 안' }), inZone, caption);
       function build() {
         const template = document.querySelector('#message_template .mes_buttons');
         for (const row of [template, ...(chat?.querySelectorAll('.mes .mes_buttons') || [])]) if (row) noteButtons(row);
         const choices = state[modeKey];
-        list.replaceChildren(...[...keyLook.keys()].map(key => {
+        const inside = key => choices[key] ? choices[key] === 'in' : keyDefault.get(key) === 'in';
+        const chip = key => {
           const look = keyLook.get(key);
-          const sw = makeSwitch(checked => {
-            if ((checked ? 'in' : 'out') === keyDefault.get(key)) delete choices[key]; else choices[key] = checked ? 'in' : 'out';
+          const node = el('button', { type: 'button', className: 'qn-chip', title: look.label });
+          node.setAttribute('aria-label', look.label);
+          node.append(look.icon ? el('i', { className: 'fa-solid ' + look.icon }) : el('span', { className: 'qn-chip-abbr', textContent: look.label.slice(0, 2) }));
+          node.addEventListener('click', () => {
+            const next = inside(key) ? 'out' : 'in';
+            if (next === keyDefault.get(key)) delete choices[key]; else choices[key] = next;
+            caption.textContent = look.label + (next === 'in' ? '  →  ··· 안' : '  →  밖');
             apply();
           });
-          sw.set(choices[key] ? choices[key] === 'in' : keyDefault.get(key) === 'in');
-          const label = el('span', { className: 'qn-row-label' }, el('i', { className: 'qn-menu-icon ' + (look.icon ? 'fa-solid ' + look.icon : '') }), document.createTextNode(look.label));
-          const line = el('div', { className: 'qn-row qn-row-switch' }, label, sw.node);
-          line.addEventListener('click', sw.flip);
-          return line;
-        }));
+          return node;
+        };
+        const keys = [...keyLook.keys()];
+        outZone.replaceChildren(...keys.filter(key => !inside(key)).map(chip));
+        inZone.replaceChildren(...keys.filter(inside).map(chip));
       }
-      box.addEventListener('toggle', () => { if (box.open) build(); });
-      syncers.push(() => { if (box.open) build(); });
+      syncers.push(() => { box.hidden = !state[shownBy]; if (!box.hidden) build(); });
       return box;
     }
 
+    const section = title => el('div', { className: 'qn-section', textContent: title });
+    // Tabs: 공통 (both modes) · 일반 · 전자책 (each mode's own look) · 기타 (names and reset).
+    // One name throughout for the per-message buttons: "메시지 버튼", folded into "··· 메뉴".
     const pages = {
-      보기: [
+      공통: [
         toggle('reader', '전자책 모드'),
         toggle('avatars', '프로필 사진 가리기', { forcedInReader: true, hide: true }), toggle('media', '본문 이미지·에셋 가리기', { forcedInReader: true, hide: true }),
         toggle('embeds', '임베드 패널 가리기', { forcedInReader: true, hide: true }), toggle('names', '대화 이름 가리기', { forcedInReader: true, hide: true }),
         toggle('meta', '메시지 정보 가리기', { forcedInReader: true, hide: true }),
-        toggle('actions', '작업 버튼 접기'), toggle('readerTools', '전자책 편집 도구', { onlyReader: true }),
+        section('화면'),
+        row('UI 글자 크기', stepper('uiSize', '%')), row('알림 위치', choice('toast')),
       ],
       일반: [
-        row('색', choice('noteColor', { swatch: true })), row('UI 글자 크기', stepper('uiSize', '%')), row('본문 글꼴', fontPicker('noteFont')),
-        toggle('noteType', '본문 크기·간격 직접 지정'), row('본문 글자 크기', stepper('noteSize', 'px', 'noteType')), row('본문 줄 간격', stepper('noteLine', '', 'noteType')),
-        row('본문 문단 간격', stepper('notePara', 'em', 'noteType')),
-        row('구분선', choice('noteDivider')), menuPicker('menuNote'),
+        row('색', choice('noteColor', { swatch: true })),
+        section('본문'),
+        row('글꼴', fontPicker('noteFont')), toggle('noteType', '크기·간격 직접 지정'),
+        row('글자 크기', stepper('noteSize', 'px', 'noteType')), row('줄 간격', stepper('noteLine', '', 'noteType')), row('문단 간격', stepper('notePara', 'em', 'noteType')),
+        row('구분선', choice('noteDivider')),
+        section('메시지 버튼'),
+        toggle('actions', '··· 메뉴로 접기'), menuPicker('menuNote', 'actions'),
       ],
       전자책: [
-        row('종이', choice('paper', { swatch: true })), row('UI 글자 크기', stepper('uiSize', '%')), row('본문 글꼴', fontPicker('readerFont')),
-        toggle('readerType', '본문 크기·줄 간격 직접 지정'), row('본문 글자 크기', stepper('readerSize', 'px', 'readerType')), row('본문 줄 간격', stepper('readerLine', '', 'readerType')),
+        row('종이', choice('paper', { swatch: true })),
+        section('본문'),
+        row('글꼴', fontPicker('readerFont')), toggle('readerType', '크기·줄 간격 직접 지정'),
+        row('글자 크기', stepper('readerSize', 'px', 'readerType')), row('줄 간격', stepper('readerLine', '', 'readerType')),
         row('문단 간격', stepper('readerPara', 'em')), toggle('readerIndent', '첫 줄 들여쓰기'), row('좌우 여백', stepper('readerMargin', 'px')),
-        row('정렬', choice('readerAlign')), row('구분선', choice('readerDivider')), menuPicker('menuReader'),
+        row('정렬', choice('readerAlign')), row('구분선', choice('readerDivider')),
+        section('메시지 버튼'),
+        toggle('readerTools', '전자책에서도 보이기'), menuPicker('menuReader', 'readerTools'),
       ],
       기타: [
         row('탭 제목', text('titleNote')), row('전자책 탭 제목', text('titleReader')),
-        row('캐릭터 이름', text('nameBot')), row('유저 이름', text('nameUser')), row('알림 위치', choice('toast')),
+        row('캐릭터 이름', text('nameBot')), row('유저 이름', text('nameUser')),
         button('꾸미기 기본값으로', () => {
           for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
           for (const key of ['noteType', 'readerType', 'readerIndent']) state[key] = flags[key];
@@ -301,7 +321,7 @@
     };
     const tabBar = el('div', { className: 'qn-tabs', role: 'tablist' });
     const pageBox = el('div', { className: 'qn-page' });
-    let currentPage = '보기';
+    let currentPage = '공통';
     const tabs = Object.keys(pages).map(name => {
       const tab = button(name, () => { currentPage = name; syncSettings(); });
       tab.setAttribute('role', 'tab');
@@ -637,7 +657,7 @@
       return /^(serif|sans-serif|monospace)$/.test(name) ? name : '"' + name.replace(/"/g, '') + '"';
     };
     const lookVars = {
-      '--qn-size': () => pick('noteSize', 'readerSize') + 'px', '--qn-line': () => String(pick('noteLine', 'readerLine')),
+      '--qn-size': () => pick('noteSize', 'readerSize') + 'px', '--qn-lh': () => String(pick('noteLine', 'readerLine')),
       '--qn-font': fontValue, '--qn-r-para': () => state.readerPara + 'em', '--qn-r-margin': () => state.readerMargin + 'px',
       '--qn-n-para': () => state.notePara + 'em',
     };

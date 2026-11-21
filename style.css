@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.8-beta.1');
-:root { --qn-css: "2.9.8-beta.1"; }
+@import url('./icons.css?v=2.9.9-beta.1');
+:root { --qn-css: "2.9.9-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -236,7 +236,7 @@ html.qn-active #chat .mes_text .qn-hidden-shell { display: none !important; }
 /* ── Typography: the theme's (and Font Manager's) unless chosen in settings ── */
 html.qn-active[data-qn-type="on"] #chat .mes .mes_text,
 html.qn-active[data-qn-type="on"] #chat .mes .mes_text > :is(p, blockquote, ul, ol),
-html.qn-active[data-qn-type="on"] #chat .mes .mes_text > :is(ul, ol) li { font-size: var(--qn-size) !important; line-height: var(--qn-line) !important; }
+html.qn-active[data-qn-type="on"] #chat .mes .mes_text > :is(ul, ol) li { font-size: var(--qn-size) !important; line-height: var(--qn-lh) !important; }
 html.qn-active[data-qn-font="on"] #chat .mes .mes_text,
 html.qn-active[data-qn-font="on"] #chat .mes .mes_text :is(p, li, blockquote, q, em, strong, b, i:not([class*="fa-"])) { font-family: var(--qn-font), sans-serif !important; }
 
@@ -301,7 +301,7 @@ html.qn-active[data-qn-font="on"] #chat .mes .mes_text :is(p, li, blockquote, q,
 .qn-settings-body .qn-mode-row:has(.qn-switch[aria-checked="true"]) { border-color: var(--qn-accent); }
 
 /* Controls are plain elements with every theme style reset, so they look the same in every theme. */
-.qn-settings-body :where(.qn-switch, .qn-switch > i, .qn-tabs > button, .qn-segments > button, .qn-swatches > button, .qn-stepper > button) {
+.qn-settings-body :where(.qn-switch, .qn-switch > i, .qn-tabs > button, .qn-segments > button, .qn-swatches > button, .qn-stepper > button, .qn-chip) {
   all: unset; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
 }
 
@@ -614,13 +614,20 @@ html.qn-active[data-qn-ui] #chat { --mainFontSize: calc(var(--fontScale, 1) * 15
 html.qn-active:not(.qn-reader)[data-qn-type="on"] #chat .mes .mes_text p { margin-block: 0 var(--qn-n-para, 1em) !important; }
 html.qn-active:not(.qn-reader)[data-qn-type="on"] #chat .mes .mes_text p:last-child { margin-bottom: 0 !important; }
 
-/* ── Settings: message menu list ── */
-.qn-settings-body .qn-menu-picker > summary { cursor: pointer; list-style: none; border-bottom: 0; }
-.qn-settings-body .qn-menu-picker > summary::-webkit-details-marker { display: none; }
-.qn-settings-body .qn-menu-picker > summary::after { content: '▾'; opacity: .6; }
-.qn-settings-body .qn-menu-picker[open] > summary::after { content: '▴'; }
-.qn-settings-body .qn-menu-list { display: flex; flex-direction: column; padding: 0 0 4px 8px; border-left: 2px solid color-mix(in srgb, var(--SmartThemeBorderColor) 70%, transparent); }
-.qn-settings-body .qn-menu-icon { display: inline-block; width: 1.4em; margin-right: 6px; text-align: center; opacity: .75; }
+/* ── Settings: sections and the message-button picker ── */
+.qn-settings-body .qn-section { margin: 14px 0 2px; font-size: .78em; font-weight: 600; letter-spacing: .06em; opacity: .6; }
+.qn-settings-body .qn-menu-picker { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 8px; }
+.qn-settings-body .qn-zone-label { font-size: .82em; opacity: .7; margin-top: 4px; }
+.qn-settings-body .qn-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 42px; padding: 6px; border-radius: 10px;
+  border: 1px dashed color-mix(in srgb, var(--SmartThemeBorderColor) 80%, transparent); }
+.qn-settings-body .qn-chips-in { background: color-mix(in srgb, var(--SmartThemeBodyColor) 6%, transparent); border-style: solid; }
+.qn-settings-body .qn-chips:empty::before { content: '—'; align-self: center; padding-left: 6px; opacity: .4; }
+.qn-settings-body .qn-chip { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; cursor: pointer;
+  background: var(--SmartThemeBlurTintColor, #fff); border: 1px solid var(--SmartThemeBorderColor); font-size: 16px; }
+.qn-settings-body .qn-chip:active { transform: scale(.94); }
+.qn-settings-body .qn-chip:focus-visible { outline: 2px solid var(--qn-accent); outline-offset: 1px; }
+.qn-settings-body .qn-chip .qn-chip-abbr { font-size: 11px; font-weight: 600; }
+.qn-settings-body .qn-menu-caption { min-height: 1.3em; font-size: .82em; opacity: .75; }
 
 /* ══ E-book: a clean sheet. Theme backgrounds, pictures, shadows, blur and filters leave the page
    and the composer; sizes and positions stay the theme's, only colours change. ══ */
@@ -647,3 +654,172 @@ html.qn-active.qn-reader #form_sheld { background-color: var(--qn-bar) !importan
 html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
   :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, .inline-drawer-content, #form_sheld, #extensionTopBar, #top-bar, #movingDivs)
   :not(.mes_text):not(.mes_text *):not(.qn-settings-body *):not(.toast *) { color: var(--qn-text) !important; }
+
+/* Dark sheets, part 2: themes also paint panels and drawers light. The panels take the dark sheet,
+   their inner boxes become see-through, and fields and buttons get a quiet raised colour. */
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, #options .options-content, .list-group, #qr--popout, #movingDivs > div) {
+  background-color: var(--qn-bar) !important; background-image: none !important; border-color: var(--qn-line) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div)
+  *:not(img, video, canvas, picture, svg, svg *, input, select, textarea, button, .menu_button, .text_pole, .mes_text, .mes_text *, .qn-settings-body *, [class*="avatar"], [class*="thumb"], .bg_example, .bg_example *) {
+  background-color: transparent !important; border-color: var(--qn-line) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea, .text_pole) {
+  background-color: var(--qn-soft) !important; background-image: none !important; color: var(--qn-text) !important; border-color: var(--qn-line) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div)
+  :is(button, .menu_button):not(.qn-settings-body *) {
+  background-color: var(--qn-soft) !important; background-image: none !important; border-color: var(--qn-line) !important; filter: none !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, .list-group, #extensionsMenu) :is(.active, .selected, .toggleEnabled, [aria-selected="true"], .selected_tab):not(.qn-settings-body *) {
+  background-color: color-mix(in srgb, var(--qn-text) 14%, var(--qn-bar)) !important;
+}
+/* Icon glyphs drawn in ::before/::after take the element's colour too. */
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(body *)::before,
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(body *)::after { -webkit-text-fill-color: currentColor !important; }
+/* Dark sheet in the normal mode: composer buttons lose the theme's boxes, as in the e-book. */
+html.qn-active:not(.qn-reader) #form_sheld :is(#leftSendForm, #rightSendForm, #nonQRFormItems) > :not(#send_textarea),
+html.qn-active:not(.qn-reader) #form_sheld :is(.dm-compact--button, #send_but, #mes_stop, #options_button, #extensionsMenuButton) {
+  background-color: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; filter: none !important; color: var(--qn-text) !important;
+}
+/* Message info line: none of the theme's frame around the avatar column. */
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper { border: 0 !important; box-shadow: none !important; outline: 0 !important; }
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper::before,
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper::after { display: none !important; }
+/* Dark sheets, part 3: decorative pictures, gradients, glows and frames inside panels go too
+   (pictures that are content, such as avatars and backgrounds, stay). */
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div),
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div) *:not(img, video, canvas, picture, .mes_text, .mes_text *, .qn-settings-body, .qn-settings-body *, .avatar, .avatar *, .avatar-container *, [class*="thumb"], .bg_example, .bg_example *) {
+  background-image: none !important; box-shadow: none !important; text-shadow: none !important; outline-color: var(--qn-line) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div) *:not(img, video, canvas, picture, .mes_text, .mes_text *, .qn-settings-body, .qn-settings-body *, .avatar, .avatar *, .avatar-container *, [class*="thumb"], .bg_example, .bg_example *)::before,
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div) *:not(img, video, canvas, picture, .mes_text, .mes_text *, .qn-settings-body, .qn-settings-body *, .avatar, .avatar *, .avatar-container *, [class*="thumb"], .bg_example, .bg_example *)::after { background-image: none !important; box-shadow: none !important; }
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group) :is(option, optgroup) { color: var(--qn-text) !important; background-color: var(--qn-bar) !important; }
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) #top-settings-holder#top-settings-holder#top-settings-holder
+  :is(button, .menu_button, .menu_button_icon, input, select, textarea, .text_pole, .inline-drawer-header, .inline-drawer-toggle):not(.qn-settings-body *) { border-color: var(--qn-line) !important; }
+/* Settings fields follow the dialog's own colours, not the theme's field colours. */
+.qn-settings-body .qn-row > :is(select, input[type="text"]) {
+  background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent) !important; background-image: none !important;
+  color: var(--SmartThemeBodyColor) !important; -webkit-text-fill-color: currentColor !important;
+  border: 1px solid var(--SmartThemeBorderColor) !important; border-radius: 8px !important; box-shadow: none !important; min-height: 34px;
+}
+.qn-settings-body .qn-row > select option { color: var(--SmartThemeBodyColor); background: var(--SmartThemeBlurTintColor); }
+
+/* ── Messages (both modes): the theme's frames, glows and ornaments around a message go.
+   Sizes stay; message HTML written by the story (inside the text) is left alone, except ST's own quotes. ── */
+html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .ch_name, .mesAvatarWrapper, .mesAvatarWrapper > *, .mes_text q, .swipe_left, .swipe_right, .swipeRightBlock) {
+  background-image: none !important; box-shadow: none !important; text-shadow: none !important; outline: 0 !important;
+}
+html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .ch_name, .mesAvatarWrapper, .mesAvatarWrapper > :not(.avatar), .mes_text q) { border-color: transparent !important; }
+html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .mesAvatarWrapper, .avatar, .mes_text q)::before,
+html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .mesAvatarWrapper, .avatar, .mes_text q)::after,
+html.qn-active:not([data-qn-divider="short"]):not([data-qn-divider="stars"]) #sheld#sheld#sheld #chat .mes::after { content: none !important; display: none !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes_text q { background-color: transparent !important; padding: 0 !important; color: var(--qn-quote) !important; }
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #sheld#sheld#sheld #chat .mesAvatarWrapper > :not(.avatar) { border: 0 !important; background: none !important; padding: 0 !important; }
+
+/* Themes reach panel contents with id selectors. The never-matching #qn-boost ids lift these rules
+   above them (an :is() list weighs as its heaviest entry) without changing what they apply to. */
+html.qn-active :is(#qn-boost#qn-boost#qn-boost, *):not(.mes_text):not(.mes_text *) { -webkit-text-fill-color: currentColor !important; }
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, .inline-drawer-content, #qr--popout, #movingDivs > div)
+  :is(#qn-boost#qn-boost#qn-boost, *):not(.mes_text):not(.mes_text *):not(.qn-settings-body *):not(.toast *) { color: var(--qn-text) !important; }
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div)
+  :is(#qn-boost#qn-boost#qn-boost, *):not(img, video, canvas, picture, svg, svg *, input, select, textarea, button, .menu_button, .text_pole, .mes_text, .mes_text *, .qn-settings-body, .qn-settings-body *, .avatar, .avatar *, .avatar-container *, [class*="thumb"], .bg_example, .bg_example *) {
+  background-color: transparent !important; background-image: none !important; box-shadow: none !important; text-shadow: none !important; border-color: var(--qn-line) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div)
+  :is(#qn-boost#qn-boost#qn-boost, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea, .text_pole, button, .menu_button):not(.qn-settings-body *) {
+  background-color: var(--qn-soft) !important; background-image: none !important; box-shadow: none !important; border-color: var(--qn-line) !important; color: var(--qn-text) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group) :is(#qn-boost#qn-boost#qn-boost, *):not(.qn-settings-body *)::before,
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group) :is(#qn-boost#qn-boost#qn-boost, *):not(.qn-settings-body *)::after { color: inherit !important; }
+/* Decorative layers themes hang on the chat and the composer (lace, paper, glitter overlays). */
+html.qn-active #sheld#sheld#sheld :is(#chat, #form_sheld, #send_form, #nonQRFormItems)::before,
+html.qn-active #sheld#sheld#sheld :is(#chat, #form_sheld, #send_form, #nonQRFormItems)::after,
+html.qn-active #sheld#sheld#sheld::before, html.qn-active #sheld#sheld#sheld::after { background-image: none !important; box-shadow: none !important; }
+/* Composer icons and quick-reply buttons take the sheet's text colour (e-book, and the dark normal sheet). */
+html.qn-active #sheld#sheld#sheld #form_sheld :is(#qn-boost#qn-boost#qn-boost, *):not(textarea):not(.dm-compact--popup *):not(.dm-compact--popup) { color: var(--qn-text) !important; }
+html.qn-active #sheld#sheld#sheld #form_sheld #qr--bar :is(#qn-boost#qn-boost#qn-boost, *) { color: var(--qn-muted) !important; border-color: var(--qn-line) !important; background-color: transparent !important; background-image: none !important; }
+html.qn-active #sheld#sheld#sheld :is(#form_sheld, #send_form, #nonQRFormItems) { border-color: var(--qn-line) !important; box-shadow: none !important; background-image: none !important; outline: 0 !important; }
+html.qn-active #sheld#sheld#sheld #send_form { border-width: 1px 0 0 !important; border-radius: 0 !important; }
+html.qn-active #sheld#sheld#sheld #form_sheld #qr--bar::before { background-color: var(--qn-line) !important; background-image: none !important; box-shadow: none !important; }
+
+/* Text blocks of the message take the sheet's colour: the theme's colour was made for its own background. */
+html.qn-active #sheld#sheld#sheld #chat .mes_text :is(#qn-boost#qn-boost#qn-boost, p, li, h1, h2, h3, h4, h5, h6, blockquote) { color: var(--qn-text) !important; -webkit-text-fill-color: currentColor !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes_text :is(#qn-boost#qn-boost#qn-boost, em, i) { color: var(--qn-muted) !important; -webkit-text-fill-color: currentColor !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes_text q { -webkit-text-fill-color: currentColor !important; }
+/* Names, message buttons and swipe arrows: sheet colours. */
+html.qn-active #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .name_text, .ch_name) { color: var(--qn-text) !important; -webkit-text-fill-color: currentColor !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .mes_button, .extraMesButtonsHint, .swipe_left, .swipe_right, .swipes-counter, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay) {
+  color: var(--qn-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; filter: none !important;
+}
+/* Top bar icons: the sheet's quiet colour. */
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder :is(.drawer-icon, .drawer-toggle > *) { color: var(--qn-muted) !important; -webkit-text-fill-color: currentColor !important; filter: none !important; opacity: 1 !important; }
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder .drawer-icon:is(.openIcon, :hover) { color: var(--qn-text) !important; }
+/* Floating shortcut buttons other extensions draw over the chat follow the dark sheet. */
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(#stqa_floating_panel, #stqa_floating_panel *) {
+  background-image: none !important; box-shadow: none !important; text-shadow: none !important; color: var(--qn-text) !important; -webkit-text-fill-color: currentColor !important; border-color: var(--qn-line) !important;
+}
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) #stqa_floating_panel :is(.stqa_floating_button) { background-color: var(--qn-soft) !important; }
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) #stqa_floating_panel { background-color: var(--qn-bar) !important; }
+/* Icon glyphs (Font Awesome and the line icons) follow their button's colour even when a theme colours ::before. */
+html.qn-active :is(#top-settings-holder, #form_sheld, #extensionTopBar, #chat .mes_buttons, #chat .mes_edit_buttons, #qn-reader-bar) :is(#qn-boost#qn-boost#qn-boost, *)::before {
+  color: inherit !important; -webkit-text-fill-color: currentColor !important; text-shadow: none !important;
+}
+/* Composer and message rows: the sheet's own backgrounds. */
+html.qn-active #sheld#sheld#sheld #send_form { background-color: var(--qn-bar) !important; }
+html.qn-active #sheld#sheld#sheld :is(#nonQRFormItems, #leftSendForm, #rightSendForm) { background-color: transparent !important; }
+html.qn-active:not(.qn-reader) #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .ch_name, .ch_name *, .mes_block, .mesAvatarWrapper > :not(.avatar)) { background-color: transparent !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes_text .TH-collapse-code-block-button { color: var(--qn-muted) !important; -webkit-text-fill-color: currentColor !important; background-color: transparent !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .mes_text) { background-color: transparent !important; }
+
+/* ── Bars (every mode): the top bar, the Chat Top Bar and the composer always look the same —
+   a plain sheet with a hairline. Themes keep their sizes; their pictures, glows, frames,
+   ornaments and button boxes don't show. Drawers that open from the top bar are left to their own rules. ── */
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder,
+html.qn-active #sheld#sheld#sheld #extensionTopBar,
+html.qn-active #sheld#sheld#sheld #form_sheld #send_form {
+  background-color: var(--qn-bar) !important; background-image: none !important; box-shadow: none !important; text-shadow: none !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important; filter: none !important; outline: 0 !important;
+  border-color: var(--qn-line) !important; border-radius: 0 !important;
+}
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder :is(#qn-boost#qn-boost#qn-boost, *):not(.drawer-content):not(.drawer-content *),
+html.qn-active #sheld#sheld#sheld #extensionTopBar :is(#qn-boost#qn-boost#qn-boost, *),
+html.qn-active #sheld#sheld#sheld #form_sheld :is(#qn-boost#qn-boost#qn-boost, *):not(.dm-compact--popup):not(.dm-compact--popup *):not(#qr--popout):not(#qr--popout *) {
+  background-image: none !important; box-shadow: none !important; text-shadow: none !important; filter: none !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder :is(.drawer, .drawer-toggle, .drawer-icon),
+html.qn-active #sheld#sheld#sheld #extensionTopBar > :not(input):not(select) { background-color: transparent !important; border-color: transparent !important; }
+/* Ornaments hung on the bars themselves (crests, ribbons, lace edges). Icon glyphs on .drawer-icon stay. */
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder::before, html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder::after,
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder :is(.drawer, .drawer-toggle)::before,
+html.qn-active #top-settings-holder#top-settings-holder#top-settings-holder :is(.drawer, .drawer-toggle, .drawer-icon)::after,
+html.qn-active #sheld#sheld#sheld #extensionTopBar::before, html.qn-active #sheld#sheld#sheld #extensionTopBar::after,
+html.qn-active #sheld#sheld#sheld :is(#form_sheld, #send_form, #nonQRFormItems, #leftSendForm, #rightSendForm)::before,
+html.qn-active #sheld#sheld#sheld :is(#form_sheld, #send_form, #nonQRFormItems, #leftSendForm, #rightSendForm)::after { content: none !important; display: none !important; }
+/* The message field: no theme box; a quiet rounded field on the sheet. */
+html.qn-active:not(.qn-reader) #sheld#sheld#sheld #send_form #send_textarea {
+  background-color: transparent !important; background-image: none !important; box-shadow: none !important; border-color: transparent !important; outline: 0 !important;
+}
+/* The chat page itself: no theme frame, inset glow or captions (house names, mottos, watermarks). */
+html.qn-active #sheld#sheld#sheld #chat { box-shadow: none !important; background-image: none !important; outline: 0 !important; border-color: transparent !important; }
+html.qn-active #sheld#sheld#sheld #chat::before, html.qn-active #sheld#sheld#sheld #chat::after,
+html.qn-active #sheld#sheld#sheld::before, html.qn-active #sheld#sheld#sheld::after { content: none !important; display: none !important; }
+/* No theme glow on anything around the message text, and no ornament captions on its name row and info. */
+html.qn-active #sheld#sheld#sheld :is(#chat, #form_sheld),
+html.qn-active #sheld#sheld#sheld #chat :is(#qn-boost#qn-boost#qn-boost, *):not(.mes_text *) { text-shadow: none !important; }
+html.qn-active #sheld#sheld#sheld #chat .mes :is(.ch_name, .ch_name > *, .name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay)::before,
+html.qn-active #sheld#sheld#sheld #chat .mes :is(.ch_name, .ch_name > *, .name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay)::after { content: none !important; display: none !important; }
