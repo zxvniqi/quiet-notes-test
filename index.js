@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.9-beta.1';
+  const VERSION = '2.10.0-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, meta: true, actions: true,
@@ -247,9 +247,13 @@
       const outZone = el('div', { className: 'qn-chips' });
       const inZone = el('div', { className: 'qn-chips qn-chips-in' });
       const caption = el('div', { className: 'qn-menu-caption' });
-      const box = el('div', { className: 'qn-menu-picker' },
-        el('div', { className: 'qn-zone-label', textContent: '밖에 보이는 버튼' }), outZone,
-        el('div', { className: 'qn-zone-label', textContent: '··· 메뉴 안' }), inZone, caption);
+      // Folded by default: a summary row like the other rows, opening onto the two zones.
+      const box = el('details', { className: 'qn-menu-picker' },
+        el('summary', { className: 'qn-row qn-menu-summary' }, el('span', { className: 'qn-row-label', textContent: '··· 메뉴에 넣을 버튼' })),
+        el('div', { className: 'qn-menu-zones' },
+          el('div', { className: 'qn-zone-label', textContent: '밖에 보이는 버튼' }), outZone,
+          el('div', { className: 'qn-zone-label', textContent: '··· 메뉴 안' }), inZone, caption));
+      box.addEventListener('toggle', () => { if (box.open) build(); });
       function build() {
         const template = document.querySelector('#message_template .mes_buttons');
         for (const row of [template, ...(chat?.querySelectorAll('.mes .mes_buttons') || [])]) if (row) noteButtons(row);
@@ -272,7 +276,7 @@
         outZone.replaceChildren(...keys.filter(key => !inside(key)).map(chip));
         inZone.replaceChildren(...keys.filter(inside).map(chip));
       }
-      syncers.push(() => { box.hidden = !state[shownBy]; if (!box.hidden) build(); });
+      syncers.push(() => { box.hidden = !state[shownBy]; if (!box.hidden && box.open) build(); });
       return box;
     }
 

@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.9-beta.1');
-:root { --qn-css: "2.9.9-beta.1"; }
+@import url('./icons.css?v=2.10.0-beta.1');
+:root { --qn-css: "2.10.0-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -206,18 +206,6 @@ html.qn-active #send_form, html.qn-active #nonQRFormItems {
 html.qn-active #send_form #send_textarea { display: block !important; opacity: 1 !important; visibility: visible !important; }
 .qn-active:not(.qn-avatars-visible) :is(.avatar, .avatar-container) img { visibility: hidden !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes :is(.avatar, .avatar-container) { display: none !important; }
-/* Message number, reply time and tokens live in the avatar column: with the picture hidden they
-   become one small grey line along the bottom of the message instead of a column of their own. */
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper {
-  position: absolute !important; left: clamp(16px, 4vw, 44px); bottom: 4px; z-index: 1;
-  display: flex !important; flex-direction: row !important; align-items: baseline !important; gap: 10px !important;
-  width: auto !important; min-width: 0 !important; height: auto !important; margin: 0 !important; padding: 0 !important;
-  font-size: 11px !important; line-height: 1.3 !important; color: var(--qn-muted) !important; background: none !important;
-}
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper > :not(.avatar) {
-  position: static !important; margin: 0 !important; padding: 0 !important; font-size: inherit !important; color: inherit !important;
-  background: none !important; border: 0 !important; text-align: left !important; width: auto !important;
-}
 /* "메시지 정보 가리기": name, timestamp, number, reply time and tokens go, as in the e-book. */
 html.qn-active:not(.qn-meta-visible) #chat .mes :is(.name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay) { display: none !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes { column-gap: 0 !important; row-gap: 0 !important; }
@@ -616,7 +604,11 @@ html.qn-active:not(.qn-reader)[data-qn-type="on"] #chat .mes .mes_text p:last-ch
 
 /* ── Settings: sections and the message-button picker ── */
 .qn-settings-body .qn-section { margin: 14px 0 2px; font-size: .78em; font-weight: 600; letter-spacing: .06em; opacity: .6; }
-.qn-settings-body .qn-menu-picker { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 8px; }
+.qn-settings-body .qn-menu-picker > .qn-menu-zones { display: flex; flex-direction: column; gap: 6px; padding: 2px 0 8px; }
+.qn-settings-body .qn-menu-summary { cursor: pointer; list-style: none; }
+.qn-settings-body .qn-menu-summary::-webkit-details-marker { display: none; }
+.qn-settings-body .qn-menu-summary::after { content: ''; width: 8px; height: 8px; margin-right: 6px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: .6; transition: transform .15s; }
+.qn-settings-body .qn-menu-picker[open] > .qn-menu-summary::after { transform: rotate(-135deg); }
 .qn-settings-body .qn-zone-label { font-size: .82em; opacity: .7; margin-top: 4px; }
 .qn-settings-body .qn-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 42px; padding: 6px; border-radius: 10px;
   border: 1px dashed color-mix(in srgb, var(--SmartThemeBorderColor) 80%, transparent); }
@@ -688,10 +680,6 @@ html.qn-active:not(.qn-reader) #form_sheld :is(#leftSendForm, #rightSendForm, #n
 html.qn-active:not(.qn-reader) #form_sheld :is(.dm-compact--button, #send_but, #mes_stop, #options_button, #extensionsMenuButton) {
   background-color: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; filter: none !important; color: var(--qn-text) !important;
 }
-/* Message info line: none of the theme's frame around the avatar column. */
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper { border: 0 !important; box-shadow: none !important; outline: 0 !important; }
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper::before,
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper::after { display: none !important; }
 /* Dark sheets, part 3: decorative pictures, gradients, glows and frames inside panels go too
    (pictures that are content, such as avatars and backgrounds, stay). */
 html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"]) :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, #qr--popout, #movingDivs > div),
@@ -715,15 +703,14 @@ html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-pape
 
 /* ── Messages (both modes): the theme's frames, glows and ornaments around a message go.
    Sizes stay; message HTML written by the story (inside the text) is left alone, except ST's own quotes. ── */
-html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .ch_name, .mesAvatarWrapper, .mesAvatarWrapper > *, .mes_text q, .swipe_left, .swipe_right, .swipeRightBlock) {
+html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .mes_text q, .swipe_left, .swipe_right, .swipeRightBlock) {
   background-image: none !important; box-shadow: none !important; text-shadow: none !important; outline: 0 !important;
 }
-html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .ch_name, .mesAvatarWrapper, .mesAvatarWrapper > :not(.avatar), .mes_text q) { border-color: transparent !important; }
-html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .mesAvatarWrapper, .avatar, .mes_text q)::before,
-html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .mesAvatarWrapper, .avatar, .mes_text q)::after,
+html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .mes_text q) { border-color: transparent !important; }
+html.qn-active #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .mes_text q)::before,
+html.qn-active #sheld#sheld#sheld #chat :is(.mes_block, .mes_text, .mes_text q)::after,
 html.qn-active:not([data-qn-divider="short"]):not([data-qn-divider="stars"]) #sheld#sheld#sheld #chat .mes::after { content: none !important; display: none !important; }
 html.qn-active #sheld#sheld#sheld #chat .mes_text q { background-color: transparent !important; padding: 0 !important; color: var(--qn-quote) !important; }
-html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #sheld#sheld#sheld #chat .mesAvatarWrapper > :not(.avatar) { border: 0 !important; background: none !important; padding: 0 !important; }
 
 /* Themes reach panel contents with id selectors. The never-matching #qn-boost ids lift these rules
    above them (an :is() list weighs as its heaviest entry) without changing what they apply to. */
@@ -781,7 +768,7 @@ html.qn-active :is(#top-settings-holder, #form_sheld, #extensionTopBar, #chat .m
 /* Composer and message rows: the sheet's own backgrounds. */
 html.qn-active #sheld#sheld#sheld #send_form { background-color: var(--qn-bar) !important; }
 html.qn-active #sheld#sheld#sheld :is(#nonQRFormItems, #leftSendForm, #rightSendForm) { background-color: transparent !important; }
-html.qn-active:not(.qn-reader) #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .ch_name, .ch_name *, .mes_block, .mesAvatarWrapper > :not(.avatar)) { background-color: transparent !important; }
+html.qn-active:not(.qn-reader) #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .mes_block) { background-color: transparent !important; }
 html.qn-active #sheld#sheld#sheld #chat .mes_text .TH-collapse-code-block-button { color: var(--qn-muted) !important; -webkit-text-fill-color: currentColor !important; background-color: transparent !important; }
 html.qn-active #sheld#sheld#sheld #chat .mes :is(#qn-boost#qn-boost#qn-boost, .mes_text) { background-color: transparent !important; }
 
@@ -821,5 +808,3 @@ html.qn-active #sheld#sheld#sheld::before, html.qn-active #sheld#sheld#sheld::af
 /* No theme glow on anything around the message text, and no ornament captions on its name row and info. */
 html.qn-active #sheld#sheld#sheld :is(#chat, #form_sheld),
 html.qn-active #sheld#sheld#sheld #chat :is(#qn-boost#qn-boost#qn-boost, *):not(.mes_text *) { text-shadow: none !important; }
-html.qn-active #sheld#sheld#sheld #chat .mes :is(.ch_name, .ch_name > *, .name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay)::before,
-html.qn-active #sheld#sheld#sheld #chat .mes :is(.ch_name, .ch_name > *, .name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay)::after { content: none !important; display: none !important; }
