@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.1-beta.1');
-:root { --qn-css: "2.9.1-beta.1"; }
+@import url('./icons.css?v=2.9.2-beta.1');
+:root { --qn-css: "2.9.2-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -165,7 +165,7 @@ html.qn-active #top-settings-holder#top-settings-holder {
 }
 html.qn-active #top-settings-holder::after { display: none !important; }
 .qn-active #top-bar { top: var(--qn-header) !important; background: var(--qn-bar) !important; box-shadow: none !important; }
-html.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder#top-settings-holder, #top-bar#top-bar, #extensionTopBar#extensionTopBar, #extensionConnectionProfiles) { display: none !important; }
+html.qn-active.qn-active:not(.qn-top-visible) :is(#top-bar#top-bar, #extensionConnectionProfiles) { display: none !important; }
 .qn-active :is(.drawer-content, #left-nav-panel, #right-nav-panel) {
   top: calc(var(--qn-header) + var(--qn-tools)) !important;
   max-height: calc(100dvh - var(--qn-header) - var(--qn-tools)) !important;
@@ -195,7 +195,7 @@ html.qn-active #extensionTopBar input::placeholder { color: var(--qn-muted) !imp
 html.qn-active #extensionTopBar > i { flex: 0 0 auto !important; color: var(--qn-muted) !important; background: transparent !important; border: 0 !important; }
 
 /* ── Visibility toggles ── */
-html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld { display: none !important; }
+
 html.qn-active #send_form, html.qn-active #nonQRFormItems {
   max-height: none !important; opacity: 1 !important; visibility: visible !important; transform: none !important; min-width: 0 !important;
 }
@@ -282,18 +282,73 @@ html:not(.qn-reader) .qn-edge > .qn-progress { display: none; }
 
 /* ── Settings drawer (Extensions tab) — follows the active ST theme ── */
 .extension_block[data-name="/quiet-notes"] .extension_author { display: none !important; }
-.qn-settings-body .qn-settings-mode, .qn-settings-body .qn-settings-reset { width: 100%; margin: 6px 0; }
-.qn-settings-body .qn-settings-note { display: block; margin: 2px 0 8px; opacity: .7; }
-.qn-settings-body .qn-settings-group { margin: 8px 0; padding: 6px 10px 8px; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; }
-.qn-settings-body .qn-settings-group legend { padding: 0 4px; font-weight: 600; }
-.qn-settings-body .qn-settings-row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 36px; }
-.qn-settings-body .qn-settings-row :is(select, input[type="text"]) { grid-column: 2 / 4; width: 100%; margin: 0; }
-.qn-settings-body .qn-settings-row input[type="range"] { width: 100%; margin: 0; }
-.qn-settings-body .qn-settings-row.qn-settings-check { display: flex; gap: 10px; cursor: pointer; }
-.qn-settings-body .qn-settings-row.qn-settings-check input { flex: none; margin: 0; }
-.qn-settings-body .qn-settings-row[hidden] { display: none; }
-.qn-settings-body .qn-settings-row:has(input:disabled) { opacity: .45; }
-.qn-settings-body .qn-settings-row output { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
+.qn-settings-body { --qn-accent: var(--SmartThemeQuoteColor, #5b7a99); display: flex; flex-direction: column; gap: 10px; }
+.qn-settings-body [hidden] { display: none !important; }
+.qn-settings-body .qn-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin: 0;
+  padding: 2px 0; border-bottom: 1px solid color-mix(in srgb, var(--SmartThemeBorderColor) 60%, transparent);
+}
+.qn-settings-body .qn-row:last-child { border-bottom: 0; }
+.qn-settings-body .qn-row-label { flex: 1 1 auto; min-width: 0; }
+.qn-settings-body .qn-row-label small { display: block; opacity: .65; }
+.qn-settings-body .qn-row-switch { cursor: pointer; }
+.qn-settings-body .qn-row-switch:has(.qn-switch:disabled) { opacity: .45; cursor: default; }
+.qn-settings-body .qn-row > :is(select, input[type="text"]) { flex: 0 1 55%; width: 55%; min-width: 0; margin: 0; }
+.qn-settings-body .qn-mode-row {
+  padding: 6px 14px; border: 1px solid var(--SmartThemeBorderColor); border-radius: 12px; font-weight: 600;
+  background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+}
+.qn-settings-body .qn-mode-row:has(.qn-switch:checked) { border-color: var(--qn-accent); }
+
+/* Switch */
+.qn-settings-body .qn-switch {
+  -webkit-appearance: none; appearance: none; flex: none; position: relative; width: 46px; height: 28px; margin: 0;
+  border-radius: 14px; background: color-mix(in srgb, var(--SmartThemeBodyColor) 22%, transparent); cursor: inherit;
+  transition: background-color .2s;
+}
+.qn-settings-body .qn-switch::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px #0000004d; transition: transform .2s;
+}
+.qn-settings-body .qn-switch:checked { background: var(--qn-accent); }
+.qn-settings-body .qn-switch:checked::after { transform: translateX(18px); }
+.qn-settings-body .qn-switch:focus-visible { outline: 2px solid var(--qn-accent); outline-offset: 2px; }
+
+/* Tabs */
+.qn-settings-body .qn-tabs {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 10px;
+  background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
+}
+.qn-settings-body .qn-tabs > button {
+  min-height: 36px; margin: 0; border: 0; border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; opacity: .7;
+}
+.qn-settings-body .qn-tabs > button[aria-selected="true"] {
+  opacity: 1; font-weight: 600; background: var(--SmartThemeBlurTintColor, #fff); box-shadow: 0 1px 4px #00000026;
+}
+.qn-settings-body .qn-page { display: flex; flex-direction: column; }
+
+/* Segments, swatches, stepper */
+.qn-settings-body .qn-segments { display: flex; flex: none; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; overflow: hidden; }
+.qn-settings-body .qn-segments > button {
+  min-width: 44px; min-height: 34px; margin: 0; padding: 0 10px; border: 0; background: transparent; color: inherit; font: inherit;
+  cursor: pointer; white-space: nowrap;
+}
+.qn-settings-body .qn-segments > button + button { border-left: 1px solid var(--SmartThemeBorderColor); }
+.qn-settings-body .qn-segments > button[aria-checked="true"] { background: var(--qn-accent); color: #fff; }
+.qn-settings-body .qn-swatches { display: flex; flex: none; gap: 8px; }
+.qn-settings-body .qn-swatches > button {
+  width: 30px; height: 30px; margin: 0; padding: 0; border-radius: 50%; cursor: pointer; background: var(--qn-swatch);
+  border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 30%, transparent);
+}
+.qn-settings-body .qn-swatches > button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--SmartThemeBlurTintColor, #fff), 0 0 0 4px var(--qn-accent); }
+.qn-settings-body .qn-stepper { display: flex; flex: none; align-items: center; border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; }
+.qn-settings-body .qn-stepper > button {
+  width: 38px; height: 34px; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: 18px; cursor: pointer;
+}
+.qn-settings-body .qn-stepper > button:disabled { opacity: .3; cursor: default; }
+.qn-settings-body .qn-stepper > output { min-width: 4.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.qn-settings-body .qn-settings-reset { width: 100%; margin: 12px 0 4px; }
+.qn-settings-body .qn-settings-note { display: block; opacity: .6; text-align: center; }
 
 /* ── Message action panel: the native group, never moved or cloned ── */
 html.qn-active.qn-actions-fold #chat .mes .mes_buttons {
@@ -441,7 +496,7 @@ html.qn-active.qn-reader #chat .mes:is(.last_mes, :last-child) { padding-bottom:
 /* ══ E-book chrome: a reader app's own bar and contents list ══
    The native top bar and Chat Top Bar are not shown; their controls are pressed from the list. */
 #qn-reader-bar, #qn-toc { display: none; text-shadow: none; }
-html.qn-active.qn-reader.qn-top-visible #qn-reader-bar {
+html.qn-active.qn-reader #qn-reader-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 3006; display: flex; align-items: center; gap: 2px;
   width: min(780px, 100vw); height: calc(52px + env(safe-area-inset-top, 0px)); margin: 0 auto; box-sizing: border-box;
   padding: env(safe-area-inset-top, 0px) 4px 0; background: var(--qn-bar); color: var(--qn-text);
@@ -486,9 +541,6 @@ html.qn-active.qn-reader.qn-search #extensionTopBarSearchInput { min-height: 36p
 
 /* 메모: the composer as a note sheet. Buttons keep the theme's size and place. */
 html.qn-active.qn-reader #form_sheld { border-top: 1px solid var(--qn-line); background: var(--qn-bar); }
-html.qn-active.qn-reader #form_sheld::before {
-  content: '메모'; display: block; padding: 10px 18px 2px; font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--qn-muted);
-}
 html.qn-active.qn-reader #send_form { border-top: 0 !important; }
 
 /* Reading position: a hairline along the bottom edge. */
@@ -499,3 +551,37 @@ html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea {
   background: var(--qn-bg) !important; border: 1px solid var(--qn-line) !important; border-radius: 8px !important;
 }
 html.qn-active.qn-active.qn-active.qn-reader #send_form #send_textarea:focus { border-color: var(--qn-muted) !important; }
+
+/* Welcome screen (no chat open): the assistant greeting stays out of the book. */
+html.qn-active.qn-reader #chat .mes:is([type="assistant_message"], [type="welcome_prompt"]) { display: none !important; }
+
+
+/* Welcome screen (no chat open): the assistant greeting stays out of the book. */
+html.qn-active.qn-reader #chat .mes:is([type="assistant_message"], [type="welcome_prompt"]) { display: none !important; }
+
+/* ── Bars fold smoothly: fixed bars slide, in-page bars change height (auto ⇄ 0) ── */
+html.qn-active { interpolate-size: allow-keywords; --qn-ease: cubic-bezier(.2, .8, .2, 1); }
+html.qn-active #sheld#sheld#sheld { transition: top .26s var(--qn-ease), height .26s var(--qn-ease), max-height .26s var(--qn-ease) !important; }
+html.qn-active #top-settings-holder#top-settings-holder, html.qn-active #qn-reader-bar {
+  transition: transform .26s var(--qn-ease), visibility 0s !important;
+}
+html.qn-active.qn-active:not(.qn-top-visible) #top-settings-holder#top-settings-holder,
+html.qn-active:not(.qn-top-visible) #qn-reader-bar {
+  transform: translateY(-100%) !important; visibility: hidden !important; pointer-events: none !important;
+  transition: transform .22s ease-in, visibility 0s .22s !important;
+}
+html.qn-active #extensionTopBar#extensionTopBar, html.qn-active #form_sheld#form_sheld {
+  transition: height .26s var(--qn-ease), min-height .26s var(--qn-ease), padding .26s var(--qn-ease), opacity .2s, visibility 0s !important;
+}
+html.qn-active.qn-active.qn-active:not(.qn-top-visible) #extensionTopBar#extensionTopBar,
+html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld {
+  display: flex !important; height: 0 !important; min-height: 0 !important; padding-block: 0 !important; border-width: 0 !important;
+  overflow: hidden !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+  transition: height .22s ease-in, min-height .22s ease-in, padding .22s ease-in, opacity .2s, visibility 0s .22s !important;
+}
+html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld { display: block !important; }
+html.qn-active.qn-compose-visible #form_sheld#form_sheld { height: auto !important; }
+html.qn-active.qn-top-visible #extensionTopBar#extensionTopBar { height: auto !important; }
+@media (prefers-reduced-motion: reduce) {
+  html.qn-active :is(#sheld, #top-settings-holder, #qn-reader-bar, #extensionTopBar, #form_sheld) { transition: none !important; }
+}
