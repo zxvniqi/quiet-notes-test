@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.2-beta.1';
+  const VERSION = '2.9.3-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
@@ -25,7 +25,7 @@
     readerFont: { value: '', font: true },
     readerSize: { value: 15, min: 12, max: 22, step: 1 }, readerLine: { value: 1.7, min: 1.3, max: 2.2, step: 0.05 },
     readerPara: { value: 0.6, min: 0, max: 2, step: 0.1 }, readerMargin: { value: 22, min: 8, max: 56, step: 2 },
-    readerAlign: { value: 'left', options: ['left', 'justify'] },
+    readerAlign: { value: 'justify', options: ['justify', 'left'] },
     readerDivider: { value: 'stars', options: ['line', 'short', 'stars', 'none'] },
   };
   const fontName = /^[^;{}<>\\]{0,80}$/;
@@ -42,6 +42,8 @@
     const saved = JSON.parse(window.localStorage.getItem(KEY) || '{}');
     for (const key of Object.keys(flags)) if (typeof saved[key] === 'boolean') state[key] = saved[key];
     for (const key of Object.keys(looks)) if (valid(key, saved[key])) state[key] = saved[key];
+    // Before 2.9.3 'left' was the default (not a choice); books now start justified.
+    if (!saved.v) state.readerAlign = looks.readerAlign.value;
   } catch { /* Storage may be unavailable in private browsing. */ }
   // Apply the saved mode as soon as this module loads, before constructing controls.
   document.documentElement.classList.toggle('qn-active', state.enabled);
@@ -79,12 +81,29 @@
     const syncers = [];
     const labels = {
       top: '위', bottom: '아래', white: '흰색', gray: '회색', dark: '어둡게', line: '선', short: '짧은 선', stars: '* * *', none: '없음',
-      paper: '종이', sepia: '세피아', night: '야간', left: '왼쪽', justify: '양쪽',
+      paper: '미색', sepia: '베이지', night: '야간', left: '왼쪽', justify: '양쪽',
     };
     const swatches = {
       white: '#ffffff', gray: '#eaecef', dark: '#22262b',
-      paper: '#faf8f2', sepia: '#f4ecd8', night: '#1a1917',
+      paper: '#f8f6f1', sepia: '#f2ede4', night: '#1c1c1e',
     };
+    const darkSwatches = new Set(['dark', 'night']);
+    // A switch made of plain spans: themes restyle checkboxes, never these.
+    function makeSwitch(onChange) {
+      const node = el('span', { className: 'qn-switch', tabIndex: 0 }, el('i'));
+      node.setAttribute('role', 'switch');
+      const flip = () => { if (node.getAttribute('aria-disabled') !== 'true') onChange(node.getAttribute('aria-checked') !== 'true'); };
+      node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+      return {
+        node, flip,
+        set(checked, disabled = false) { node.setAttribute('aria-checked', String(checked)); node.setAttribute('aria-disabled', String(disabled)); },
+      };
+    }
+    function switchRow(text, sw, className = '') {
+      const line = el('div', { className: 'qn-row qn-row-switch ' + className }, el('span', { className: 'qn-row-label', textContent: text }), sw.node);
+      line.addEventListener('click', sw.flip);
+      return line;
+    }
     const fontLabels = { '': '기존 그대로', serif: '명조 계열', 'sans-serif': '고딕 계열' };
     function fillFonts(select, current) {
       const names = new Set(['', 'serif', 'sans-serif']);
@@ -101,13 +120,11 @@
     const set = (key, value) => { state[key] = value; apply(); };
     const row = (text, control, hint) => el('div', { className: 'qn-row' }, el('span', { className: 'qn-row-label', textContent: text }, ...(hint ? [el('small', { textContent: hint })] : [])), control);
     function toggle(key, text, { forcedInReader = false, onlyReader = false } = {}) {
-      const input = el('input', { type: 'checkbox', className: 'qn-switch' });
-      input.addEventListener('change', () => set(key, input.checked));
-      const line = el('label', { className: 'qn-row qn-row-switch' }, el('span', { className: 'qn-row-label', textContent: text }), input);
+      const sw = makeSwitch(checked => set(key, checked));
+      const line = switchRow(text, sw);
       syncers.push(() => {
         const forced = forcedInReader && state.enabled && state.reader;
-        input.checked = !forced && state[key];
-        input.disabled = forced;
+        sw.set(!forced && state[key], forced);
         line.hidden = onlyReader && !state.reader;
       });
       return line;
@@ -117,7 +134,7 @@
       const items = looks[key].options.map(value => {
         const item = button(swatch ? '' : labels[value], () => set(key, value));
         item.setAttribute('role', 'radio');
-        if (swatch) { item.style.setProperty('--qn-swatch', swatches[value]); item.title = labels[value]; item.setAttribute('aria-label', labels[value]); }
+        if (swatch) { item.style.setProperty('--qn-swatch', swatches[value]); item.style.setProperty('--qn-check', darkSwatches.has(value) ? '#fff' : '#333'); item.title = labels[value]; item.setAttribute('aria-label', labels[value]); }
         return [value, item];
       });
       box.append(...items.map(([, item]) => item));
@@ -154,11 +171,11 @@
       return input;
     }
 
-    const modeSwitch = el('input', { type: 'checkbox', className: 'qn-switch' });
-    modeSwitch.addEventListener('change', () => { if (modeSwitch.checked !== state.enabled) toggleMode(); });
-    const modeLabel = el('span', { className: 'qn-row-label' });
-    settingsBody.append(el('label', { className: 'qn-row qn-row-switch qn-mode-row' }, modeLabel, modeSwitch));
-    syncers.push(() => { modeSwitch.checked = state.enabled; modeLabel.textContent = state.enabled ? '일코 모드 켜짐' : '일코 모드 꺼짐'; });
+    const modeSwitch = makeSwitch(checked => { if (checked !== state.enabled) toggleMode(); });
+    const modeRow = switchRow('', modeSwitch, 'qn-mode-row');
+    const modeLabel = modeRow.firstElementChild;
+    settingsBody.append(modeRow);
+    syncers.push(() => { modeSwitch.set(state.enabled); modeLabel.textContent = state.enabled ? '일코 모드 켜짐' : '일코 모드 꺼짐'; });
 
     const pages = {
       보기: [
@@ -218,7 +235,7 @@
       return !!host;
     });
 
-    // ── Dialog (settings) and chooser (wand menu → turn on/off or settings) ──
+    // ── Settings dialog (opened from the wand menu and the e-book bar) ──
     // Modal <dialog>s live in the top layer: themes put a transform on <html>, which would
     // otherwise pin fixed boxes to a 0px-tall page and push them off screen.
     const dialogBody = el('div', { className: 'qn-dialog-body' });
@@ -231,22 +248,15 @@
       if (open) { dialogBody.append(settingsBody); syncSettings(); dialog.showModal(); } else dialog.close();
     }
     dialog.addEventListener('close', () => drawerContent.append(settingsBody));
-    const chooserMode = button('', () => { showChooser(false); toggleMode(); });
-    const chooser = el('dialog', { id: 'qn-chooser', ariaLabel: 'Quiet Notes' },
-      el('div', { className: 'qn-chooser-row' }, chooserMode, button('설정', () => { showChooser(false); openDialog(true); })));
-    function showChooser(show) {
-      if (show === chooser.open) return;
-      if (show) chooser.showModal(); else chooser.close();
-    }
     // A press on the backdrop lands on the <dialog> itself.
-    for (const node of [dialog, chooser]) node.addEventListener('click', e => { if (e.target === node) node.close(); });
-    document.body.append(dialog, chooser);
+    dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+    document.body.append(dialog);
 
     const wandLabel = el('span', { textContent: 'Quiet Notes' });
-    const wandToggle = el('div', { id: 'qn-wand-toggle', className: 'list-group-item flex-container flexGap5', tabIndex: 0, title: '일코 모드 · 설정' },
+    const wandToggle = el('div', { id: 'qn-wand-toggle', className: 'list-group-item flex-container flexGap5', tabIndex: 0, title: '일코 모드 설정' },
       el('div', { className: 'extensionsMenuExtensionButton fa-fw fa-solid fa-file-lines', ariaHidden: 'true' }), wandLabel);
     wandToggle.setAttribute('role', 'button');
-    wandToggle.addEventListener('click', () => showChooser(true));
+    wandToggle.addEventListener('click', () => openDialog(true));
     wandToggle.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wandToggle.click(); }
     });
@@ -258,20 +268,24 @@
     });
 
     // ── Edge grips: thin lines above and below the chat. Drag towards the page to reveal a bar, away to fold it. ──
-    const progress = el('span', { className: 'qn-progress' });
     function edge(kind) {
-      const grip = el('div', { className: 'qn-edge-grip', tabIndex: 0, title: kind === 'top' ? '상단 도구: 아래로 끌어 열기, 위로 끌어 닫기' : '입력 바: 위로 끌어 열기, 아래로 끌어 닫기' });
+      const grip = el('div', { className: 'qn-edge-grip', tabIndex: 0, title: kind === 'top' ? '상단 도구 열기·닫기' : '입력 바 열기·닫기' });
       grip.setAttribute('role', 'button');
       const key = () => kind === 'top' ? (state.reader ? 'readerTop' : 'top') : (state.reader ? 'readerCompose' : 'compose');
       const set = open => { if (state[key()] !== open) { state[key()] = open; apply(); } };
+      // A tap flips the bar; a drag of 16px or more opens or folds it by direction.
       let startY = null;
-      grip.addEventListener('pointerdown', e => { startY = e.clientY; try { grip.setPointerCapture(e.pointerId); } catch { /* Synthetic events. */ } });
+      let moved = false;
+      grip.addEventListener('pointerdown', e => { startY = e.clientY; moved = false; try { grip.setPointerCapture(e.pointerId); } catch { /* Synthetic events. */ } });
       grip.addEventListener('pointermove', e => {
-        if (startY === null || Math.abs(e.clientY - startY) < 16) return;
+        if (startY === null) return;
+        if (Math.abs(e.clientY - startY) > 8) moved = true;
+        if (Math.abs(e.clientY - startY) < 16) return;
         set(kind === 'top' ? e.clientY > startY : e.clientY < startY);
         startY = null; // One toggle per drag.
       });
-      for (const type of ['pointerup', 'pointercancel']) grip.addEventListener(type, () => { startY = null; });
+      grip.addEventListener('pointerup', () => { if (startY !== null && !moved) set(!state[key()]); startY = null; });
+      grip.addEventListener('pointercancel', () => { startY = null; });
       grip.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!state[key()]); }
       });
@@ -279,7 +293,6 @@
     }
     const topEdge = edge('top');
     const bottomEdge = edge('bottom');
-    bottomEdge.append(progress);
     function mountEdges() {
       if (!chat) return;
       if (!state.enabled) { topEdge.remove(); bottomEdge.remove(); return; }
@@ -317,13 +330,19 @@
       toc.hidden = !show;
     }
     const readerTitle = el('span', { className: 'qn-reader-title' });
-    const searchButton = barButton('검색', '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>', () => {
-      const on = root.classList.toggle('qn-search');
-      if (on) document.getElementById('extensionTopBarSearchInput')?.focus();
+    // ‹ opens the shelf and closes it again. ST closes an open drawer on any press outside it
+    // before this click runs, so the state at press time decides.
+    const shelfPanel = () => document.getElementById('right-nav-panel');
+    let shelfWasOpen = false;
+    const shelfButton = barButton('책장', '<path d="M15 5l-7 7 7 7"/>', () => {
+      showToc(false);
+      const shelf = document.getElementById('rightNavDrawerIcon');
+      const openNow = !!shelfPanel()?.classList.contains('openDrawer');
+      if (shelf && openNow === shelfWasOpen) press(shelf);
     });
+    shelfButton.addEventListener('pointerdown', () => { shelfWasOpen = !!shelfPanel()?.classList.contains('openDrawer'); }, true);
     const readerBar = el('nav', { id: 'qn-reader-bar' },
-      barButton('책장', '<path d="M15 5l-7 7 7 7"/>', () => { showToc(false); const shelf = document.getElementById('rightNavDrawerIcon'); if (shelf) press(shelf); }),
-      readerTitle, searchButton,
+      shelfButton, readerTitle,
       barButton('목차', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".7"/><circle cx="4.5" cy="12" r=".7"/><circle cx="4.5" cy="18" r=".7"/>', () => showToc(toc.hidden)),
       barButton('보기 설정', '<path d="M3 18l4.5-11L12 18M4.6 14.5h5.8"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M20 12.5V18"/>', () => { showToc(false); openDialog(true); }));
     readerBar.setAttribute('aria-label', '읽기 도구');
@@ -451,7 +470,7 @@
       if (!toc.hidden && !toc.contains(e.target) && !readerBar.contains(e.target)) showToc(false);
     }, {signal: abort.signal});
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeActions(); showChooser(false); showToc(false); openDialog(false); }
+      if (e.key === 'Escape') { closeActions(); showToc(false); openDialog(false); }
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyM' && !e.repeat) { e.preventDefault(); toggleMode(); }
     }, {signal: abort.signal});
     // E-book footer shows only the reading position, like a reader app's page indicator.
@@ -460,9 +479,7 @@
       progressFrame = 0;
       if (!state.enabled || !state.reader || !chat) return;
       const range = chat.scrollHeight - chat.clientHeight;
-      const percent = (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%';
-      progress.textContent = percent;
-      bottomEdge.style.setProperty('--qn-read', percent);
+      bottomEdge.style.setProperty('--qn-read', (range > 0 ? Math.round(chat.scrollTop / range * 100) : 100) + '%');
     }
     chat?.addEventListener('scroll', () => { if (!progressFrame && state.enabled && state.reader) progressFrame = requestAnimationFrame(updateProgress); }, {passive: true, signal: abort.signal});
 
@@ -544,7 +561,7 @@
       closeActions();
       state.enabled = false;
       mountEdges();
-      for (const node of [dialog, chooser, readerBar, toc, wandContainer, settingsPanel]) node.remove();
+      for (const node of [dialog, readerBar, toc, wandContainer, settingsPanel]) node.remove();
       refreshShells();
       syncBlue();
       applyLooks();
@@ -560,16 +577,43 @@
       if (!chat || !chat.isConnected || !chat.getClientRects().length) return null;
       if (chat.scrollHeight - chat.clientHeight - chat.scrollTop < 40) return {bottom: true};
       const box = chat.getBoundingClientRect();
-      // elementsFromPoint: the native top bar may lie over the chat while incognito mode is off.
-      const y = Math.max(box.top, 0) + 24;
-      const mes = document.elementsFromPoint(box.left + box.width / 2, y).find(node => node.closest?.('#chat .mes'))?.closest('#chat .mes');
-      return mes ? {mes, offset: mes.getBoundingClientRect().top - box.top} : null;
+      // The paragraph being read, not its whole message: a message grows a lot between modes
+      // (pictures, avatars, panels), its paragraphs barely. elementsFromPoint: bars may lie over the chat.
+      const top = Math.max(box.top, 0);
+      const y = top + Math.min(Math.max(box.bottom - top, 0) * 0.3, 160);
+      const hit = document.elementsFromPoint(box.left + box.width / 2, y).find(node => node.closest?.('#chat .mes'));
+      if (!hit) return null;
+      const mes = hit.closest('#chat .mes');
+      const text = hit.closest('#chat .mes_text :is(p, li, blockquote, pre, h1, h2, h3, h4, h5, h6, div)') || hit.closest('#chat .mes_text');
+      const at = node => node.getBoundingClientRect().top - box.top;
+      return {mes, offset: at(mes), text, textOffset: text ? at(text) : 0};
     }
     function restoreAnchor(anchor) {
       if (!anchor) return;
       if (anchor.bottom) { chat.scrollTop = chat.scrollHeight; return; }
-      if (!anchor.mes.isConnected) return;
-      chat.scrollTop += anchor.mes.getBoundingClientRect().top - chat.getBoundingClientRect().top - anchor.offset;
+      const chatTop = chat.getBoundingClientRect().top;
+      if (anchor.text?.isConnected && anchor.text.getClientRects().length) chat.scrollTop += anchor.text.getBoundingClientRect().top - chatTop - anchor.textOffset;
+      else if (anchor.mes.isConnected) chat.scrollTop += anchor.mes.getBoundingClientRect().top - chatTop - anchor.offset;
+    }
+    // Late layout changes (stylesheets, theme rules, bar heights, fonts) keep moving the text for a
+    // moment after a mode change: hold the reading position for a short while unless the reader scrolls.
+    let holdFrame = 0;
+    let holdCancel = null;
+    function holdAnchor(anchor) {
+      cancelAnimationFrame(holdFrame);
+      holdCancel?.();
+      restoreAnchor(anchor);
+      if (!anchor) return;
+      const until = performance.now() + 900;
+      const stop = () => { cancelAnimationFrame(holdFrame); holdCancel?.(); };
+      const inputs = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+      for (const type of inputs) chat.addEventListener(type, stop, { passive: true });
+      holdCancel = () => { for (const type of inputs) chat.removeEventListener(type, stop); holdCancel = null; };
+      const tick = now => {
+        restoreAnchor(anchor);
+        if (now < until) holdFrame = requestAnimationFrame(tick); else holdCancel?.();
+      };
+      holdFrame = requestAnimationFrame(tick);
     }
     let lastNames = null;
     let lastMedia = null;
@@ -594,19 +638,15 @@
       }
       const media = [state.enabled, reader, state.media, state.embeds].join(':');
       if (lastMedia !== media) { refreshShells(); lastMedia = media; }
-      progress.textContent = '';
       if (reader) updateProgress();
       readerTitle.textContent = state.titleReader || looks.titleReader.value;
-      searchButton.hidden = !document.getElementById('extensionTopBarSearchInput');
-      if (!reader || !top) { showToc(false); root.classList.remove('qn-search'); }
+      if (!reader || !top) showToc(false);
       for (const [node, open] of [[topEdge, top], [bottomEdge, compose]]) node.firstElementChild.setAttribute('aria-expanded', String(open));
-      const modeText = state.enabled ? '일코 모드 끄기' : '일코 모드 켜기';
-      chooserMode.textContent = modeText;
       syncSettings();
-      restoreAnchor(anchor);
+      holdAnchor(anchor);
       titleUpdate();
       updateFavicons();
-      try { window.localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* Session still works. */ }
+      try { window.localStorage.setItem(KEY, JSON.stringify({ ...state, v: 3 })); } catch { /* Session still works. */ }
       // All original form nodes, drafts, event handlers and generation controls remain intact.
     }
     apply();
