@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.6-beta.1');
-:root { --qn-css: "2.9.6-beta.1"; }
+@import url('./icons.css?v=2.9.7-beta.1');
+:root { --qn-css: "2.9.7-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -205,7 +205,21 @@ html.qn-active #send_form, html.qn-active #nonQRFormItems {
 }
 html.qn-active #send_form #send_textarea { display: block !important; opacity: 1 !important; visibility: visible !important; }
 .qn-active:not(.qn-avatars-visible) :is(.avatar, .avatar-container) img { visibility: hidden !important; }
-html.qn-active:not(.qn-avatars-visible) #chat .mes :is(.avatar, .avatar-container, .mesAvatarWrapper) { display: none !important; }
+html.qn-active:not(.qn-avatars-visible) #chat .mes :is(.avatar, .avatar-container) { display: none !important; }
+/* Message number, reply time and tokens live in the avatar column: with the picture hidden they
+   become one small grey line along the bottom of the message instead of a column of their own. */
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper {
+  position: absolute !important; left: clamp(16px, 4vw, 44px); bottom: 4px; z-index: 1;
+  display: flex !important; flex-direction: row !important; align-items: baseline !important; gap: 10px !important;
+  width: auto !important; min-width: 0 !important; height: auto !important; margin: 0 !important; padding: 0 !important;
+  font-size: 11px !important; line-height: 1.3 !important; color: var(--qn-muted) !important; background: none !important;
+}
+html.qn-active:not(.qn-avatars-visible):not(.qn-reader) #chat .mes .mesAvatarWrapper > :not(.avatar) {
+  position: static !important; margin: 0 !important; padding: 0 !important; font-size: inherit !important; color: inherit !important;
+  background: none !important; border: 0 !important; text-align: left !important; width: auto !important;
+}
+/* "메시지 정보 가리기": name, timestamp, number, reply time and tokens go, as in the e-book. */
+html.qn-active:not(.qn-meta-visible) #chat .mes :is(.name_text, .timestamp, .mesIDDisplay, .mes_timer, .tokenCounterDisplay) { display: none !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes { column-gap: 0 !important; row-gap: 0 !important; }
 html.qn-active:not(.qn-avatars-visible) #chat .mes .mes_block { margin-inline: 0 !important; padding-inline: 0 !important; width: 100% !important; max-width: 100% !important; }
 .qn-active:not(.qn-avatars-visible) :is(.zoomed_avatar, #expression-holder, .expression-holder) { display: none !important; }
@@ -407,28 +421,43 @@ html.qn-active #loader:not(.splash-screen) #load-spinner::before {
   html.qn-active #loader:not(.splash-screen) #load-spinner::before { animation: none; }
 }
 
-/* ── Notifications (both modes): a note card with a coloured edge and title ── */
+/* ── Notifications (both modes): a small "saved" pill under the bar. No colour but a red dot for errors. ── */
 html.qn-active #toast-container {
-  position: fixed !important; top: calc(var(--qn-header) + 10px) !important; bottom: auto !important;
-  left: 50% !important; right: auto !important; width: min(380px, calc(100vw - 24px)) !important;
-  transform: translateX(-50%) !important;
+  position: fixed !important; top: calc(var(--qn-header) + var(--qn-tools) + 10px) !important; bottom: auto !important;
+  left: 50% !important; right: auto !important; transform: translateX(-50%) !important;
+  width: max-content !important; max-width: calc(100vw - 32px) !important;
+  display: flex !important; flex-direction: column !important; align-items: center !important; pointer-events: none;
 }
-html.qn-active[data-qn-toast="bottom"] #toast-container { top: auto !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px) !important; }
+html.qn-active[data-qn-toast="bottom"] #toast-container { top: auto !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px) !important; flex-direction: column-reverse !important; }
 html.qn-active #toast-container > .toast {
-  --qn-tone: var(--qn-info);
-  width: 100% !important; box-sizing: border-box !important; margin: 0 0 8px !important;
-  padding: 12px 16px 12px 18px !important; background: color-mix(in srgb, var(--qn-tone) 9%, var(--qn-bg)) !important; background-image: none !important;
-  color: var(--qn-text) !important; border: 1px solid var(--qn-line) !important; border-left: 5px solid var(--qn-tone) !important;
-  border-radius: 8px !important; box-shadow: 0 6px 22px #00000026, 0 1px 3px #00000014 !important;
-  opacity: 1 !important; font-size: 13px !important; line-height: 1.55 !important; text-shadow: none !important;
+  --qn-dot: var(--qn-muted);
+  --qn-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='3.2' r='1' fill='white'/%3E%3Cpath d='M6 5.4v3.8' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  display: flex !important; align-items: center !important; gap: 8px !important; pointer-events: auto;
+  width: auto !important; max-width: 100% !important; min-height: 0 !important; box-sizing: border-box !important; margin: 0 0 8px !important;
+  padding: 8px 14px 8px 10px !important; border: 0 !important; border-radius: 18px !important;
+  background: color-mix(in srgb, var(--qn-bar) 88%, var(--qn-text)) !important; background-image: none !important;
+  color: var(--qn-text) !important; box-shadow: 0 2px 10px #0000001f !important;
+  opacity: 1 !important; font-size: 13px !important; line-height: 1.4 !important; text-shadow: none !important;
 }
-html.qn-active #toast-container > .toast-success { --qn-tone: var(--qn-success); }
-html.qn-active #toast-container > .toast-warning { --qn-tone: var(--qn-warning); }
-html.qn-active #toast-container > .toast-error { --qn-tone: var(--qn-error); }
-html.qn-active #toast-container .toast-title { color: var(--qn-tone) !important; font-weight: 700 !important; font-size: 13px !important; margin-bottom: 2px; }
-html.qn-active #toast-container .toast-message { color: var(--qn-text) !important; }
-html.qn-active #toast-container .toast-progress { background: var(--qn-tone) !important; opacity: .5 !important; height: 2px !important; }
-html.qn-active #toast-container :is(.toast-close-button, .action-loader-stop) { color: var(--qn-muted) !important; text-shadow: none !important; opacity: 1 !important; min-width: 28px; min-height: 28px; }
+/* The kind shows only as a small mark in a circle: ✓ saved, ! warning, ! on red for errors, i otherwise. */
+html.qn-active #toast-container > .toast::before {
+  content: '' !important; display: block !important; flex: none; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--qn-dot) var(--qn-glyph) center / 12px no-repeat;
+}
+html.qn-active #toast-container > .toast-success { --qn-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.3l2.2 2.2L9.5 3.7' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+html.qn-active #toast-container > :is(.toast-warning, .toast-error) { --qn-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M6 2.8v4' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='9.2' r='1' fill='white'/%3E%3C/svg%3E"); }
+html.qn-active #toast-container > .toast-error { --qn-dot: var(--qn-error); }
+html.qn-active #toast-container .toast-title { display: none !important; }
+html.qn-active #toast-container .toast-message {
+  flex: 1 1 auto; min-width: 0; color: inherit !important; overflow: hidden;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere;
+}
+html.qn-active #toast-container :is(.toast-progress, .toast-close-button) { display: none !important; }
+/* Buttons other extensions add to a toast sit beside the text instead of over it. */
+html.qn-active #toast-container > .toast > :not(.toast-title, .toast-message, .toast-progress, .toast-close-button) {
+  position: static !important; inset: auto !important; transform: none !important; flex: none; margin: 0 !important; color: var(--qn-muted) !important;
+}
+html.qn-active #toast-container .action-loader-stop { flex: none; color: var(--qn-muted) !important; text-shadow: none !important; opacity: 1 !important; min-width: 28px; min-height: 28px; }
 
 /* ══ E-book ══════════════════════════════════════════════════
    Effective visibility flags are forced off; saved preferences are preserved. */

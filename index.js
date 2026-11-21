@@ -4,10 +4,10 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.6-beta.1';
+  const VERSION = '2.9.7-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
-    enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
+    enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, meta: true, actions: true,
     reader: false, readerTop: false, readerCompose: false, readerTools: false,
     // Typography is the theme's (and Font Manager's) unless these are switched on.
     noteType: false, readerType: false, readerIndent: true,
@@ -196,6 +196,7 @@
         toggle('reader', '전자책 모드'),
         toggle('avatars', '프로필 사진 가리기', { forcedInReader: true, hide: true }), toggle('media', '본문 이미지·에셋 가리기', { forcedInReader: true, hide: true }),
         toggle('embeds', '임베드 패널 가리기', { forcedInReader: true, hide: true }), toggle('names', '대화 이름 가리기', { forcedInReader: true, hide: true }),
+        toggle('meta', '메시지 정보 가리기', { forcedInReader: true, hide: true }),
         toggle('actions', '작업 버튼 접기'), toggle('readerTools', '전자책 편집 도구', { onlyReader: true }),
       ],
       일반: [
@@ -661,7 +662,7 @@
       const names = [state.enabled && !state.names, state.nameBot, state.nameUser].join('\n');
       if (lastNames !== names) { chat?.querySelectorAll('.name_text').forEach(updateName); lastNames = names; }
       if (!state.enabled || !(state.actions || state.reader) || (reader && !state.readerTools)) closeActions();
-      for (const [key, visible] of Object.entries({top, compose, avatars: !reader && state.avatars, media: !reader && state.media, embeds: !reader && state.embeds})) {
+      for (const [key, visible] of Object.entries({top, compose, avatars: !reader && state.avatars, media: !reader && state.media, embeds: !reader && state.embeds, meta: !reader && state.meta})) {
         root.classList.toggle('qn-' + key + '-visible', visible);
       }
       const media = [state.enabled, reader, state.media, state.embeds].join(':');
