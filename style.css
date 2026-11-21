@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.7-beta.1');
-:root { --qn-css: "2.9.7-beta.1"; }
+@import url('./icons.css?v=2.9.8-beta.1');
+:root { --qn-css: "2.9.8-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -432,12 +432,12 @@ html.qn-active[data-qn-toast="bottom"] #toast-container { top: auto !important; 
 html.qn-active #toast-container > .toast {
   --qn-dot: var(--qn-muted);
   --qn-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='3.2' r='1' fill='white'/%3E%3Cpath d='M6 5.4v3.8' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  display: flex !important; align-items: center !important; gap: 8px !important; pointer-events: auto;
+  display: flex; align-items: center !important; gap: 8px !important; pointer-events: auto;
   width: auto !important; max-width: 100% !important; min-height: 0 !important; box-sizing: border-box !important; margin: 0 0 8px !important;
   padding: 8px 14px 8px 10px !important; border: 0 !important; border-radius: 18px !important;
   background: color-mix(in srgb, var(--qn-bar) 88%, var(--qn-text)) !important; background-image: none !important;
   color: var(--qn-text) !important; box-shadow: 0 2px 10px #0000001f !important;
-  opacity: 1 !important; font-size: 13px !important; line-height: 1.4 !important; text-shadow: none !important;
+  opacity: 1; font-size: 13px !important; line-height: 1.4 !important; text-shadow: none !important;
 }
 /* The kind shows only as a small mark in a circle: ✓ saved, ! warning, ! on red for errors, i otherwise. */
 html.qn-active #toast-container > .toast::before {
@@ -602,3 +602,48 @@ html.qn-active #form_sheld { z-index: 2001; }
 /* Panels that rely on the theme's blur get a solid sheet, so text behind them can't show through. */
 html.qn-active .dm-compact--popup { background-color: var(--qn-bar) !important; }
 html.qn-active .dm-compact--popup :is(textarea, .dm-compact--content, .dm-compact--body) { background-color: var(--qn-bg) !important; color: var(--qn-text) !important; }
+
+/* ── Text colour: some themes paint text with -webkit-text-fill-color, which wins over color.
+   While incognito mode is on, text is filled with its own colour (in the e-book, message text too). ── */
+html.qn-active *:not(.mes_text):not(.mes_text *),
+html.qn-active.qn-reader #chat .mes_text, html.qn-active.qn-reader #chat .mes_text * { -webkit-text-fill-color: currentColor !important; }
+
+/* ── UI text size: the chat keeps ST's own size; only its settings change the message text ── */
+html.qn-active[data-qn-ui] #chat { --mainFontSize: calc(var(--fontScale, 1) * 15px) !important; }
+/* Paragraph spacing of the message text (normal mode, when sizes are chosen). */
+html.qn-active:not(.qn-reader)[data-qn-type="on"] #chat .mes .mes_text p { margin-block: 0 var(--qn-n-para, 1em) !important; }
+html.qn-active:not(.qn-reader)[data-qn-type="on"] #chat .mes .mes_text p:last-child { margin-bottom: 0 !important; }
+
+/* ── Settings: message menu list ── */
+.qn-settings-body .qn-menu-picker > summary { cursor: pointer; list-style: none; border-bottom: 0; }
+.qn-settings-body .qn-menu-picker > summary::-webkit-details-marker { display: none; }
+.qn-settings-body .qn-menu-picker > summary::after { content: '▾'; opacity: .6; }
+.qn-settings-body .qn-menu-picker[open] > summary::after { content: '▴'; }
+.qn-settings-body .qn-menu-list { display: flex; flex-direction: column; padding: 0 0 4px 8px; border-left: 2px solid color-mix(in srgb, var(--SmartThemeBorderColor) 70%, transparent); }
+.qn-settings-body .qn-menu-icon { display: inline-block; width: 1.4em; margin-right: 6px; text-align: center; opacity: .75; }
+
+/* ══ E-book: a clean sheet. Theme backgrounds, pictures, shadows, blur and filters leave the page
+   and the composer; sizes and positions stay the theme's, only colours change. ══ */
+html.qn-active.qn-reader :is(#sheld, #chat, #form_sheld),
+html.qn-active.qn-reader #sheld#sheld#sheld #chat *, .qn-edge, .qn-edge-grip,
+html.qn-active.qn-reader #sheld#sheld#sheld #form_sheld, html.qn-active.qn-reader #sheld#sheld#sheld #form_sheld *:not(.dm-compact--popup):not(.dm-compact--popup *) {
+  background-image: none !important; box-shadow: none !important; text-shadow: none !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html.qn-active.qn-reader #sheld#sheld#sheld #chat :is(.mes, .mes_block, .mes_text, .mes_text *) { background-color: transparent !important; border-color: transparent !important; }
+html.qn-active.qn-reader #sheld#sheld#sheld #chat .mes_text :is(strong, b, span, font, p, div, u, s, small) { color: inherit !important; }
+html.qn-active.qn-reader #sheld#sheld#sheld #chat .mes_text :is(em, i) { color: var(--qn-muted) !important; }
+html.qn-active.qn-reader #sheld#sheld#sheld #chat .mes_text q { color: var(--qn-quote) !important; }
+html.qn-active.qn-reader #sheld#sheld#sheld #chat .mes_text :is(q, blockquote) { padding: 0 !important; border: 0 !important; }
+html.qn-active.qn-reader #form_sheld :is(#send_form, #nonQRFormItems, #leftSendForm, #rightSendForm, #qr--bar) { background-color: transparent !important; border-color: transparent !important; }
+html.qn-active.qn-reader #form_sheld :is(#leftSendForm, #rightSendForm, #nonQRFormItems) > *,
+html.qn-active.qn-reader #form_sheld :is(.dm-compact--button, #send_but, #mes_stop, #options_button, #extensionsMenuButton) {
+  background-color: transparent !important; border-color: transparent !important; filter: none !important; outline: 0 !important;
+}
+html.qn-active.qn-reader #form_sheld { background-color: var(--qn-bar) !important; }
+
+/* Dark sheets: every label, hint and icon inside panels, drawers and pop-ups takes the light text colour
+   (themes write dark or grey colours straight into their CSS for these). */
+html.qn-active:is([data-qn-note="dark"]:not(.qn-reader), .qn-reader[data-qn-paper="night"])
+  :is(.drawer-content, .popup, dialog:not(#qn-dialog), #extensionsMenu, .options-content, .list-group, .inline-drawer-content, #form_sheld, #extensionTopBar, #top-bar, #movingDivs)
+  :not(.mes_text):not(.mes_text *):not(.qn-settings-body *):not(.toast *) { color: var(--qn-text) !important; }

@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.7-beta.1';
+  const VERSION = '2.9.8-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, meta: true, actions: true,
@@ -19,7 +19,9 @@
     toast: { value: 'top', options: ['top', 'bottom'] },
     noteColor: { value: 'white', options: ['white', 'gray', 'dark'] },
     noteFont: { value: '', font: true },
+    uiSize: { value: 100, min: 80, max: 130, step: 5 },
     noteSize: { value: 16, min: 12, max: 22, step: 1 }, noteLine: { value: 1.7, min: 1.3, max: 2.2, step: 0.05 },
+    notePara: { value: 1, min: 0, max: 2, step: 0.1 },
     noteDivider: { value: 'line', options: ['line', 'short', 'stars', 'none'] },
     paper: { value: 'paper', options: ['paper', 'white', 'sepia', 'gray', 'night'] },
     readerFont: { value: '', font: true },
@@ -31,6 +33,13 @@
   const fontName = /^[^;{}<>\\]{0,80}$/;
   let state = { ...flags };
   for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
+  // Message menu choices per mode: button key → 'in' (inside ···) or 'out' (in the row). Only changes are kept.
+  const menus = ['menuNote', 'menuReader'];
+  for (const key of menus) state[key] = {};
+  function validMenu(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).filter(([k, v]) => /^[\w-]{1,80}$/.test(k) && (v === 'in' || v === 'out')).slice(0, 200));
+  }
   function valid(key, value) {
     const spec = looks[key];
     if (spec.font) return typeof value === 'string' && fontName.test(value);
@@ -42,6 +51,7 @@
     const saved = JSON.parse(window.localStorage.getItem(KEY) || '{}');
     for (const key of Object.keys(flags)) if (typeof saved[key] === 'boolean') state[key] = saved[key];
     for (const key of Object.keys(looks)) if (valid(key, saved[key])) state[key] = saved[key];
+    for (const key of menus) state[key] = validMenu(saved[key]);
     // Before 2.9.3 'left' was the default (not a choice); books now start justified.
     if (!saved.v) state.readerAlign = looks.readerAlign.value;
   } catch { /* Storage may be unavailable in private browsing. */ }
@@ -191,6 +201,72 @@
     settingsBody.append(modeRow);
     syncers.push(() => { modeSwitch.set(state.enabled); modeLabel.textContent = state.enabled ? '일코 모드 켜짐' : '일코 모드 꺼짐'; });
 
+    // ── Message menu: which buttons stay in the row and which go inside "···", for each mode.
+    //    Buttons are moved between the row and ST's own box inside the same message, so every
+    //    handler keeps working; turning the mode off puts each one back where it was found. ──
+    const plainClass = /^(mes_button|interactable|menu_button|fa|fa-fw|fa-solid|fa-regular|fa-brands|fa-[\w-]+)$/;
+    const buttonKey = node => [...node.classList].find(name => !plainClass.test(name)) || node.id || '';
+    const origin = new WeakMap(); // button → 'in' | 'out', where it was first seen
+    const keyDefault = new Map(); // key → where ST or its extension puts it
+    const keyLook = new Map(); // key → { label, icon } for the settings list
+    function rowParts(row) {
+      return { hint: row.querySelector(':scope > .extraMesButtonsHint'), box: row.querySelector(':scope > .extraMesButtons') };
+    }
+    function noteButtons(row) {
+      const { hint, box } = rowParts(row);
+      if (!hint || !box) return [];
+      const nodes = [...row.children, ...box.children].filter(node => node !== hint && node !== box && buttonKey(node));
+      for (const node of nodes) {
+        const key = buttonKey(node);
+        if (!origin.has(node)) origin.set(node, node.parentElement === box ? 'in' : 'out');
+        if (!keyDefault.has(key)) keyDefault.set(key, origin.get(node));
+        if (!keyLook.has(key)) {
+          const icon = [...node.classList].filter(name => /^fa-/.test(name) && !/^fa-(fw|solid|regular|brands)$/.test(name)).join(' ')
+            || [...(node.querySelector('[class*="fa-"]')?.classList || [])].filter(name => /^fa-/.test(name)).join(' ');
+          keyLook.set(key, { label: (node.title || node.getAttribute('aria-label') || node.textContent || key).trim().slice(0, 40) || key, icon });
+        }
+      }
+      return nodes;
+    }
+    const menuMode = () => state.reader ? 'menuReader' : 'menuNote';
+    const menuActive = () => state.enabled && (state.actions || state.reader);
+    function arrangeRow(row) {
+      const { hint, box } = rowParts(row);
+      if (!hint || !box) return;
+      const choices = state[menuMode()];
+      for (const node of noteButtons(row)) {
+        const key = buttonKey(node);
+        const inside = menuActive() ? (choices[key] ? choices[key] === 'in' : keyDefault.get(key) === 'in') : origin.get(node) === 'in';
+        if (inside && node.parentElement !== box) box.append(node);
+        else if (!inside && node.parentElement === box) row.insertBefore(node, hint);
+      }
+    }
+    const arrangeAll = () => chat?.querySelectorAll('.mes .mes_buttons').forEach(arrangeRow);
+    function menuPicker(modeKey) {
+      const list = el('div', { className: 'qn-menu-list' });
+      const box = el('details', { className: 'qn-menu-picker' }, el('summary', { className: 'qn-row', textContent: '··· 메뉴에 넣을 버튼' }), list);
+      function build() {
+        const template = document.querySelector('#message_template .mes_buttons');
+        for (const row of [template, ...(chat?.querySelectorAll('.mes .mes_buttons') || [])]) if (row) noteButtons(row);
+        const choices = state[modeKey];
+        list.replaceChildren(...[...keyLook.keys()].map(key => {
+          const look = keyLook.get(key);
+          const sw = makeSwitch(checked => {
+            if ((checked ? 'in' : 'out') === keyDefault.get(key)) delete choices[key]; else choices[key] = checked ? 'in' : 'out';
+            apply();
+          });
+          sw.set(choices[key] ? choices[key] === 'in' : keyDefault.get(key) === 'in');
+          const label = el('span', { className: 'qn-row-label' }, el('i', { className: 'qn-menu-icon ' + (look.icon ? 'fa-solid ' + look.icon : '') }), document.createTextNode(look.label));
+          const line = el('div', { className: 'qn-row qn-row-switch' }, label, sw.node);
+          line.addEventListener('click', sw.flip);
+          return line;
+        }));
+      }
+      box.addEventListener('toggle', () => { if (box.open) build(); });
+      syncers.push(() => { if (box.open) build(); });
+      return box;
+    }
+
     const pages = {
       보기: [
         toggle('reader', '전자책 모드'),
@@ -200,15 +276,16 @@
         toggle('actions', '작업 버튼 접기'), toggle('readerTools', '전자책 편집 도구', { onlyReader: true }),
       ],
       일반: [
-        row('색', choice('noteColor', { swatch: true })), row('글꼴', fontPicker('noteFont')),
-        toggle('noteType', '크기·줄 간격 직접 지정'), row('글자 크기', stepper('noteSize', 'px', 'noteType')), row('줄 간격', stepper('noteLine', '', 'noteType')),
-        row('구분선', choice('noteDivider')),
+        row('색', choice('noteColor', { swatch: true })), row('UI 글자 크기', stepper('uiSize', '%')), row('본문 글꼴', fontPicker('noteFont')),
+        toggle('noteType', '본문 크기·간격 직접 지정'), row('본문 글자 크기', stepper('noteSize', 'px', 'noteType')), row('본문 줄 간격', stepper('noteLine', '', 'noteType')),
+        row('본문 문단 간격', stepper('notePara', 'em', 'noteType')),
+        row('구분선', choice('noteDivider')), menuPicker('menuNote'),
       ],
       전자책: [
-        row('종이', choice('paper', { swatch: true })), row('글꼴', fontPicker('readerFont')),
-        toggle('readerType', '크기·줄 간격 직접 지정'), row('글자 크기', stepper('readerSize', 'px', 'readerType')), row('줄 간격', stepper('readerLine', '', 'readerType')),
+        row('종이', choice('paper', { swatch: true })), row('UI 글자 크기', stepper('uiSize', '%')), row('본문 글꼴', fontPicker('readerFont')),
+        toggle('readerType', '본문 크기·줄 간격 직접 지정'), row('본문 글자 크기', stepper('readerSize', 'px', 'readerType')), row('본문 줄 간격', stepper('readerLine', '', 'readerType')),
         row('문단 간격', stepper('readerPara', 'em')), toggle('readerIndent', '첫 줄 들여쓰기'), row('좌우 여백', stepper('readerMargin', 'px')),
-        row('정렬', choice('readerAlign')), row('구분선', choice('readerDivider')),
+        row('정렬', choice('readerAlign')), row('구분선', choice('readerDivider')), menuPicker('menuReader'),
       ],
       기타: [
         row('탭 제목', text('titleNote')), row('전자책 탭 제목', text('titleReader')),
@@ -216,6 +293,7 @@
         button('꾸미기 기본값으로', () => {
           for (const [key, spec] of Object.entries(looks)) state[key] = spec.value;
           for (const key of ['noteType', 'readerType', 'readerIndent']) state[key] = flags[key];
+          for (const key of menus) state[key] = {};
           apply();
         }, 'menu_button qn-settings-reset'),
         el('small', { className: 'qn-settings-note', textContent: '이 기기에만 저장됩니다.' }),
@@ -452,6 +530,7 @@
     }
     const blueObserver = new MutationObserver(() => { if (!adjustingBlue) syncBlue(); });
     blueObserver.observe(document.body, {attributes: true, attributeFilter: ['class']});
+    const menuRows = new Set();
     const actionsObserver = new MutationObserver(records => {
       if (!state.enabled) return;
       const mediaRoots = new Set();
@@ -473,9 +552,15 @@
             else node.querySelectorAll('.name_text').forEach(updateName);
           }
           if (node.matches(mediaSelector) || node.querySelector(mediaSelector)) mediaRoots.add(node.closest('.mes_text') || node);
+          // New messages, and buttons extensions add to a message later, take the chosen menu layout.
+          const row = node.closest('.mes_buttons');
+          if (row) menuRows.add(row);
+          else node.querySelectorAll('.mes_buttons').forEach(found => menuRows.add(found));
         }
       }
       for (const scope of mediaRoots) refreshShells(scope);
+      for (const row of menuRows) arrangeRow(row);
+      menuRows.clear();
     });
     if (chat) actionsObserver.observe(chat, {childList: true, subtree: true, characterData: true});
     document.addEventListener('click', e => {
@@ -554,7 +639,18 @@
     const lookVars = {
       '--qn-size': () => pick('noteSize', 'readerSize') + 'px', '--qn-line': () => String(pick('noteLine', 'readerLine')),
       '--qn-font': fontValue, '--qn-r-para': () => state.readerPara + 'em', '--qn-r-margin': () => state.readerMargin + 'px',
+      '--qn-n-para': () => state.notePara + 'em',
     };
+    // UI text size: ST sizes its interface from --mainFontSize; the chat keeps the original value
+    // (see the stylesheet), so the message text follows only its own settings.
+    let uiScaled = false;
+    function applyUiSize() {
+      const scaled = state.enabled && state.uiSize !== 100;
+      if (scaled) root.style.setProperty('--mainFontSize', 'calc(var(--fontScale, 1) * ' + (15 * state.uiSize / 100).toFixed(2) + 'px)');
+      else if (uiScaled) root.style.removeProperty('--mainFontSize');
+      root.toggleAttribute('data-qn-ui', scaled);
+      uiScaled = scaled;
+    }
     const lookAttrs = {
       'data-qn-note': () => state.noteColor, 'data-qn-paper': () => state.paper, 'data-qn-toast': () => state.toast,
       'data-qn-divider': () => pick('noteDivider', 'readerDivider'), 'data-qn-align': () => state.readerAlign,
@@ -570,6 +666,7 @@
         if (state.enabled) root.setAttribute(name, value()); else root.removeAttribute(name);
       }
       if (!state.enabled) root.style.removeProperty('--qn-bar-h');
+      applyUiSize();
     }
     function syncSettings() {
       // Page swap first, so rows on the new page sync in the same pass.
@@ -588,6 +685,7 @@
       closeActions();
       state.enabled = false;
       mountEdges();
+      arrangeAll();
       const form = document.getElementById('form_sheld');
       if (form) form.inert = false;
       for (const node of [dialog, readerBar, toc, wandContainer, settingsPanel]) node.remove();
@@ -674,6 +772,7 @@
       // The folded composer stays laid out below the screen: keep it out of reach of taps and focus.
       const form = document.getElementById('form_sheld');
       if (form) form.inert = state.enabled && !compose;
+      arrangeAll();
       syncSettings();
       holdAnchor(anchor);
       titleUpdate();
