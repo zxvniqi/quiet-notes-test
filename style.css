@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.5-beta.1');
-:root { --qn-css: "2.9.5-beta.1"; }
+@import url('./icons.css?v=2.9.6-beta.1');
+:root { --qn-css: "2.9.6-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -551,8 +551,14 @@ html.qn-active.qn-reader #chat .mes:is([type="assistant_message"], [type="welcom
 
 
 /* ── Bars: folded bars leave the page at once; a bar that opens fades in (no layout animation) ── */
-html.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder#top-settings-holder#top-settings-holder, #qn-reader-bar#qn-reader-bar, #extensionTopBar#extensionTopBar#extensionTopBar),
-html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld { display: none !important; }
+html.qn-active.qn-active:not(.qn-top-visible) :is(#top-settings-holder#top-settings-holder#top-settings-holder, #qn-reader-bar#qn-reader-bar, #extensionTopBar#extensionTopBar#extensionTopBar) { display: none !important; }
+/* The folded composer stays laid out just below the screen (not display:none): buttons that other
+   scripts dock beside the wand (e.g. a WI monitor) then stay put instead of leaving and coming back. */
+html.qn-active.qn-active:not(.qn-compose-visible) #form_sheld#form_sheld {
+  position: absolute !important; left: 0 !important; right: 0 !important; top: 100% !important; bottom: auto !important;
+  opacity: 0 !important; pointer-events: none !important; animation: none !important;
+}
+html.qn-active.qn-active:not(.qn-compose-visible) #sheld#sheld#sheld { overflow: hidden !important; }
 html.qn-active.qn-top-visible:not(.qn-reader) :is(#top-settings-holder, #extensionTopBar),
 html.qn-active.qn-reader.qn-top-visible #qn-reader-bar { animation: qn-in-top .15s ease-out; }
 html.qn-active.qn-compose-visible #form_sheld { animation: qn-in-bottom .15s ease-out; }
@@ -562,7 +568,8 @@ html.qn-active.qn-compose-visible #form_sheld { animation: qn-in-bottom .15s eas
   html.qn-active :is(#top-settings-holder, #qn-reader-bar, #extensionTopBar, #form_sheld) { animation: none !important; }
 }
 /* The composer and its popups (e.g. Direction Manager) stay above the edge grips. */
-html.qn-active #form_sheld { position: relative; z-index: 2001; }
+html.qn-active.qn-compose-visible #form_sheld { position: relative; z-index: 2001; }
+html.qn-active #form_sheld { z-index: 2001; }
 /* Panels that rely on the theme's blur get a solid sheet, so text behind them can't show through. */
 html.qn-active .dm-compact--popup { background-color: var(--qn-bar) !important; }
 html.qn-active .dm-compact--popup :is(textarea, .dm-compact--content, .dm-compact--body) { background-color: var(--qn-bg) !important; color: var(--qn-text) !important; }

@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.5-beta.1';
+  const VERSION = '2.9.6-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
@@ -74,6 +74,18 @@
       styleLink.after(fresh);
     }
     if (styleLink?.sheet) refreshStyle(); else styleLink?.addEventListener('load', refreshStyle, {once: true});
+    // ST sends no cache headers, so a phone can keep running old files for hours after an update.
+    // When manifest.json names a new version, the extension's own files are fetched again into the
+    // browser cache (same origin, in the background); the next page load then runs them.
+    if (styleLink) (async () => {
+      try {
+        const base = new URL('./', styleLink.href);
+        const manifest = await (await fetch(new URL('manifest.json', base), { cache: 'no-cache' })).json();
+        if (window.localStorage.getItem(KEY + '.files') === manifest.version) return;
+        await Promise.all(['index.js', 'style.css', 'icons.css'].map(file => fetch(new URL(file, base), { cache: 'reload' })));
+        window.localStorage.setItem(KEY + '.files', manifest.version);
+      } catch { /* The cache refreshes on its own later. */ }
+    })();
 
     // ── Settings: one body, shown in the Extensions tab drawer or moved into the dialog. ──
     // A switch for the mode, then tabs; every control writes state and calls apply().
@@ -283,7 +295,7 @@
       const grip = el('div', { className: 'qn-edge-grip', tabIndex: 0, title: kind === 'top' ? '상단 도구 열기·닫기' : '입력 바 열기·닫기' });
       grip.setAttribute('role', 'button');
       const key = () => kind === 'top' ? (state.reader ? 'readerTop' : 'top') : (state.reader ? 'readerCompose' : 'compose');
-      const set = open => { if (state[key()] !== open) { state[key()] = open; guardUntil = performance.now() + 450; apply(); } };
+      const set = open => { if (state[key()] !== open) { state[key()] = open; guardUntil = performance.now() + 700; apply(); } };
       // A tap flips the bar; a drag of 16px or more opens or folds it by direction.
       let startY = null;
       let moved = false;
@@ -297,6 +309,9 @@
       });
       grip.addEventListener('pointerup', e => { if (startY !== null && !moved) { e.preventDefault(); set(!state[key()]); } startY = null; });
       grip.addEventListener('pointercancel', () => { startY = null; });
+      // A touch always ends on the element it started on: cancelling it here stops the phone from
+      // sending its own click afterwards to whatever now lies under the finger (a chat, a button).
+      grip.addEventListener('touchend', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
       grip.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!state[key()]); }
       });
@@ -572,6 +587,8 @@
       closeActions();
       state.enabled = false;
       mountEdges();
+      const form = document.getElementById('form_sheld');
+      if (form) form.inert = false;
       for (const node of [dialog, readerBar, toc, wandContainer, settingsPanel]) node.remove();
       refreshShells();
       syncBlue();
@@ -653,6 +670,9 @@
       readerTitle.textContent = state.titleReader || looks.titleReader.value;
       if (!reader || !top) showToc(false);
       for (const [node, open] of [[topEdge, top], [bottomEdge, compose]]) node.firstElementChild.setAttribute('aria-expanded', String(open));
+      // The folded composer stays laid out below the screen: keep it out of reach of taps and focus.
+      const form = document.getElementById('form_sheld');
+      if (form) form.inert = state.enabled && !compose;
       syncSettings();
       holdAnchor(anchor);
       titleUpdate();
