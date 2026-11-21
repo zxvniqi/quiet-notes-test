@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.4-beta.1';
+  const VERSION = '2.9.5-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,

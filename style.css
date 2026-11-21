@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.9.4-beta.1');
-:root { --qn-css: "2.9.4-beta.1"; }
+@import url('./icons.css?v=2.9.5-beta.1');
+:root { --qn-css: "2.9.5-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 
@@ -229,11 +229,12 @@ html.qn-active[data-qn-font="on"] #chat .mes .mes_text :is(p, li, blockquote, q,
 /* ── Edge grips: thin lines above and below the chat. Drag to reveal or fold the bars. ── */
 #sheld > .qn-edge { position: relative; flex: 0 0 0; height: 0; z-index: 2000; }
 .qn-edge-grip {
-  position: absolute; left: 50%; transform: translateX(-50%); width: min(60%, 240px); height: 30px;
+  /* A wide, tall touch area around the short line, so a press near it never lands on the page. */
+  position: absolute; left: 50%; transform: translateX(-50%); width: min(88%, 440px); height: 44px;
   touch-action: none; cursor: grab; -webkit-tap-highlight-color: transparent; outline: 0;
 }
 .qn-edge-top > .qn-edge-grip { top: 0; }
-.qn-edge-bottom > .qn-edge-grip { bottom: 0; height: 36px; }
+.qn-edge-bottom > .qn-edge-grip { bottom: 0; height: 48px; }
 .qn-edge-grip::before {
   content: ''; position: absolute; left: 50%; width: 40px; height: 3px; margin-left: -20px;
   border-radius: 2px; background: var(--qn-div); opacity: .75;
