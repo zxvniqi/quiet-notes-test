@@ -1,5 +1,5 @@
-@import url('./icons.css?v=2.10.0-beta.1');
-:root { --qn-css: "2.10.0-beta.1"; }
+@import url('./icons.css?v=2.10.1-beta.1');
+:root { --qn-css: "2.10.1-beta.1"; }
 /* Quiet Notes. Scoped to qn-active; disabling restores the existing theme.
    No font-family is set anywhere: the theme's own fonts are kept. */
 

@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.10.0-beta.1';
+  const VERSION = '2.10.1-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, meta: true, actions: true,
@@ -470,9 +470,23 @@
       if (shelf && openNow === shelfWasOpen) press(shelf);
     });
     shelfButton.addEventListener('pointerdown', () => { shelfWasOpen = !!shelfPanel()?.classList.contains('openDrawer'); }, true);
+    // ☰ closes an open panel (작성 도구, 사전…) first; only with none open does it show or hide the list.
+    // Panels open at press time count, since ST may already close them on the press itself.
+    const openPanels = () => [...document.querySelectorAll('#top-settings-holder .drawer-content.openDrawer')].filter(panel => !panel.classList.contains('pinnedOpen'));
+    let panelsAtPress = [];
+    const tocButton = barButton('목차', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".7"/><circle cx="4.5" cy="12" r=".7"/><circle cx="4.5" cy="18" r=".7"/>', () => {
+      const hadPanels = panelsAtPress.length > 0 || openPanels().length > 0;
+      panelsAtPress = [];
+      if (!hadPanels) { showToc(toc.hidden); return; }
+      showToc(false);
+      for (const panel of openPanels()) {
+        const icon = panel.closest('.drawer')?.querySelector('.drawer-icon');
+        if (icon) press(icon);
+      }
+    });
+    tocButton.addEventListener('pointerdown', () => { panelsAtPress = openPanels(); }, true);
     const readerBar = el('nav', { id: 'qn-reader-bar' },
-      shelfButton, readerTitle,
-      barButton('목차', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".7"/><circle cx="4.5" cy="12" r=".7"/><circle cx="4.5" cy="18" r=".7"/>', () => showToc(toc.hidden)),
+      shelfButton, readerTitle, tocButton,
       barButton('보기 설정', '<path d="M3 18l4.5-11L12 18M4.6 14.5h5.8"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M20 12.5V18"/>', () => { showToc(false); openDialog(true); }));
     readerBar.setAttribute('aria-label', '읽기 도구');
     document.body.append(readerBar, toc);
