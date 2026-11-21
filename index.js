@@ -4,7 +4,7 @@
   const document = window.document;
   const ID = 'qn-settings';
   const KEY = 'quiet-notes.test.v1';
-  const VERSION = '2.9.0-beta.1';
+  const VERSION = '2.9.1-beta.1';
   if (document.getElementById(ID)) return;
   const flags = {
     enabled: false, top: false, compose: false, avatars: false, media: false, embeds: true, names: false, actions: true,
@@ -156,21 +156,27 @@
     });
 
     // ── Dialog (settings) and chooser (wand menu → turn on/off or settings) ──
+    // Modal <dialog>s live in the top layer: themes put a transform on <html>, which would
+    // otherwise pin fixed boxes to a 0px-tall page and push them off screen.
     const dialogBody = el('div', { className: 'qn-dialog-body' });
-    const dialog = el('div', { id: 'qn-dialog', hidden: true },
-      el('div', { className: 'qn-dialog-card', role: 'dialog', ariaLabel: 'Quiet Notes 설정' },
+    const dialog = el('dialog', { id: 'qn-dialog', ariaLabel: 'Quiet Notes 설정' },
+      el('div', { className: 'qn-dialog-card' },
         el('div', { className: 'qn-dialog-head' }, el('b', { textContent: 'Quiet Notes' }), button('✕', () => openDialog(false), 'qn-dialog-close')),
         dialogBody));
     function openDialog(open) {
-      if (open === !dialog.hidden) return;
-      dialog.hidden = !open;
-      (open ? dialogBody : drawerContent).append(settingsBody);
-      if (open) syncSettings();
+      if (open === dialog.open) return;
+      if (open) { dialogBody.append(settingsBody); syncSettings(); dialog.showModal(); } else dialog.close();
     }
-    dialog.addEventListener('pointerdown', e => { if (e.target === dialog) openDialog(false); });
+    dialog.addEventListener('close', () => drawerContent.append(settingsBody));
     const chooserMode = button('', () => { showChooser(false); toggleMode(); });
-    const chooser = el('div', { id: 'qn-chooser', hidden: true }, chooserMode, button('설정', () => { showChooser(false); openDialog(true); }));
-    function showChooser(show) { chooser.hidden = !show; }
+    const chooser = el('dialog', { id: 'qn-chooser', ariaLabel: 'Quiet Notes' },
+      el('div', { className: 'qn-chooser-row' }, chooserMode, button('설정', () => { showChooser(false); openDialog(true); })));
+    function showChooser(show) {
+      if (show === chooser.open) return;
+      if (show) chooser.showModal(); else chooser.close();
+    }
+    // A press on the backdrop lands on the <dialog> itself.
+    for (const node of [dialog, chooser]) node.addEventListener('click', e => { if (e.target === node) node.close(); });
     document.body.append(dialog, chooser);
 
     const wandLabel = el('span', { textContent: 'Quiet Notes' });
@@ -379,7 +385,6 @@
     }, {capture: true, signal: abort.signal});
     document.addEventListener('pointerdown', e => {
       if (openActions && !openActions.contains(e.target)) closeActions();
-      if (!chooser.hidden && !chooser.contains(e.target) && !wandContainer.contains(e.target)) showChooser(false);
       if (!toc.hidden && !toc.contains(e.target) && !readerBar.contains(e.target)) showToc(false);
     }, {signal: abort.signal});
     document.addEventListener('keydown', e => {
